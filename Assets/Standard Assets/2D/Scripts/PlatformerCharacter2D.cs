@@ -31,8 +31,6 @@ namespace UnityStandardAssets._2D
             //m_Anim = GetComponent<Animator>();
 			m_Anim = GetComponentInChildren<Animator>();
             m_Rigidbody2D = GetComponent<Rigidbody2D>();
-
-			print (m_Anim);
         }
 
 
@@ -114,8 +112,8 @@ namespace UnityStandardAssets._2D
             }
         }
 
-
-        private void Flip()
+		private void Flip(){}
+        private void dFlip()
         {
             // Switch the way the player is labelled as facing.
             m_FacingRight = !m_FacingRight;
