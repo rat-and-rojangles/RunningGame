@@ -20,7 +20,7 @@ namespace UnityStandardAssets._2D
         private Rigidbody2D m_Rigidbody2D;
         private bool m_FacingRight = true;  // For determining which way the player is currently facing.
 
-		const int k_MaxJumps = 2;
+		const int k_ExtraJumps = 1;
 		private int m_RemainingJumps;
 
         private void Awake()
@@ -28,8 +28,11 @@ namespace UnityStandardAssets._2D
             // Setting up references.
             m_GroundCheck = transform.Find("GroundCheck");
             m_CeilingCheck = transform.Find("CeilingCheck");
-            m_Anim = GetComponent<Animator>();
+            //m_Anim = GetComponent<Animator>();
+			m_Anim = GetComponentInChildren<Animator>();
             m_Rigidbody2D = GetComponent<Rigidbody2D>();
+
+			print (m_Anim);
         }
 
 
@@ -43,9 +46,10 @@ namespace UnityStandardAssets._2D
             for (int i = 0; i < colliders.Length; i++)
             {
 				//if (colliders [i].gameObject != gameObject) {
-				if (colliders [i].gameObject != gameObject && Mathf.Abs(m_Rigidbody2D.velocity.y) <= 0.1f ) {	//the thing with the velocity prevents wall climbing
+				//if (colliders [i].gameObject != gameObject && Mathf.Abs(m_Rigidbody2D.velocity.y) <= 0.1f ) {	//the thing with the velocity prevents wall climbing
+				if (colliders [i].gameObject != gameObject) {
 					m_Grounded = true;
-					m_RemainingJumps = k_MaxJumps;
+					m_RemainingJumps = k_ExtraJumps;
 				}
             }
             m_Anim.SetBool("Ground", m_Grounded);
@@ -102,18 +106,13 @@ namespace UnityStandardAssets._2D
                 // Add a vertical force to the player.
                 m_Grounded = false;
                 m_Anim.SetBool("Ground", false);
-                //m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
+                
 				Vector2 tempVel = m_Rigidbody2D.velocity;
 				tempVel.y = m_JumpForce;
 				m_Rigidbody2D.velocity = tempVel;
 				m_RemainingJumps--;
             }
         }
-
-		void LateUpdate(){
-			//transform.Translate (Vector3.right * 0.05f);
-
-		}
 
 
         private void Flip()
