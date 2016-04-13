@@ -110,6 +110,11 @@ namespace UnityStandardAssets._2D
             }
         }
 
+		void LateUpdate(){
+			//transform.Translate (Vector3.right * 0.05f);
+
+		}
+
 
         private void Flip()
         {
