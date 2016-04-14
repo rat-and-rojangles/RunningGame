@@ -34,8 +34,6 @@ public class AutoMoveLevel : MonoBehaviour {
 		player.position = temp;
 
 
-		print (temp.x);
-
 		//player.MovePosition ((Vector2)player.position + (Vector2)direction * speed);
 
 	}
