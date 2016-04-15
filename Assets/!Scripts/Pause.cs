@@ -35,7 +35,7 @@ public class Pause : MonoBehaviour {
 	private IEnumerator fadeIn(){
 		while (musicLowPass.cutoffFrequency < 22000) {
 			print ("i");
-			musicLowPass.cutoffFrequency = Mathf.Lerp (musicLowPass.cutoffFrequency, 22000, 4 * Time.unscaledDeltaTime);
+			musicLowPass.cutoffFrequency = Mathf.Lerp (musicLowPass.cutoffFrequency, 22000, 3 * Time.unscaledDeltaTime);
 			yield return null;
 		}
 	}
@@ -43,7 +43,7 @@ public class Pause : MonoBehaviour {
 	private IEnumerator fadeOut(){
 		while (musicLowPass.cutoffFrequency > minFQ) {
 			print ("o");
-			musicLowPass.cutoffFrequency = Mathf.Lerp (musicLowPass.cutoffFrequency, minFQ, 4 * Time.unscaledDeltaTime);
+			musicLowPass.cutoffFrequency = Mathf.Lerp (musicLowPass.cutoffFrequency, minFQ, 6 * Time.unscaledDeltaTime);
 			yield return null;
 		}
 	}
