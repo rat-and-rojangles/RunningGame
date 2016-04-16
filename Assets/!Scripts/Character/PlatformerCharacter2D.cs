@@ -9,7 +9,7 @@ public class PlatformerCharacter2D : MonoBehaviour
     [SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
 
     private Transform m_GroundCheck;    // A position marking where to check if the player is grounded.
-    const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
+    const float k_GroundedRadius = .1f; // Radius of the overlap circle to determine if grounded
     private bool m_Grounded;            // Whether or not the player is grounded.
     private Animator m_Anim;            // Reference to the player's animator component.
     private Rigidbody2D m_Rigidbody2D;
@@ -88,5 +88,17 @@ public class PlatformerCharacter2D : MonoBehaviour
 
 	public void Die(){
 		m_Rigidbody2D.position = lastCheckpoint;
+
+		Transform tempCam = GameObject.FindGameObjectWithTag ("CameraController").transform;
+
+		Vector3 tempCamPos = tempCam.position;
+		tempCamPos.x = lastCheckpoint.x;
+		tempCam.position = tempCamPos;
+	}
+
+	void OnTriggerEnter2D(Collider2D other){
+		if (other.tag.Equals ("Respawn")) {
+			lastCheckpoint = other.transform.position;
+		}
 	}
 }
