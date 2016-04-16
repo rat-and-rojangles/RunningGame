@@ -4,10 +4,10 @@ using System.Collections;
 //[ExecuteInEditMode]
 public class AutoMoveLevel : MonoBehaviour {
 
-	[SerializeField] Vector3 direction = Vector3.right;
-	[SerializeField] float speed = 0.05f;
+	[SerializeField] private Vector3 direction = Vector3.right;
+	[SerializeField] private float speed = 20.0f;
 
-	private Rigidbody2D player;
+	private Rigidbody2D playerRB;
 	private GameObject mainCam;
 
 	void Awake () {
@@ -19,22 +19,21 @@ public class AutoMoveLevel : MonoBehaviour {
 			}
 		}*/
 
-		player = GameObject.FindGameObjectWithTag ("Player").GetComponent<Rigidbody2D>();
+		playerRB = GameObject.FindGameObjectWithTag ("Player").GetComponent<Rigidbody2D>();
 		mainCam = GameObject.FindGameObjectWithTag ("CameraController");
 	}
 	
 	void LateUpdate(){		//for camera
 		mainCam.transform.Translate (direction * speed * Time.deltaTime);
-		//player.MovePosition ((Vector2)player.position + (Vector2)direction * speed);
 	}
 
 	void FixedUpdate(){		//for player (not FixedUpdate so it's once per frame)
-		Vector3 temp = player.position;
+		Vector3 temp = playerRB.position;
 		temp += (direction * speed * Time.fixedDeltaTime);
-		player.position = temp;
+		playerRB.position = temp;
 
 
-		//player.MovePosition ((Vector2)player.position + (Vector2)direction * speed);
+		//playerRB.MovePosition ((Vector2)playerRB.position + (Vector2)direction * speed);
 
 	}
 

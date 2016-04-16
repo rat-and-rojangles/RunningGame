@@ -27,7 +27,7 @@ public class PlatformerCharacter2D : MonoBehaviour
 		m_Anim = GetComponentInChildren<Animator>();
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
 
-		lastCheckpoint = transform.position;
+		lastCheckpoint = transform.position;	//first checkpoint is start
     }
 
 
@@ -40,8 +40,6 @@ public class PlatformerCharacter2D : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
         for (int i = 0; i < colliders.Length; i++)
         {
-			//if (colliders [i].gameObject != gameObject) {
-			//if (colliders [i].gameObject != gameObject && Mathf.Abs(m_Rigidbody2D.velocity.y) <= 0.1f ) {	//the thing with the velocity prevents wall climbing
 			if (colliders [i].gameObject != gameObject) {
 				m_Grounded = true;
 				m_RemainingJumps = k_ExtraJumps;
@@ -70,10 +68,8 @@ public class PlatformerCharacter2D : MonoBehaviour
             m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed, m_Rigidbody2D.velocity.y);
         }
         // If the player should jump...
-		//if (m_Grounded && jump && m_Anim.GetBool("Ground") && m_RemainingJumps > 0)
 		if (m_RemainingJumps > 0 && jump)
         {
-			//m_Anim.SetBool("JumpFire", m_Grounded);		//play the jump anim if on ground
             // Add a vertical force to the player.
             m_Grounded = false;
             m_Anim.SetBool("Ground", false);
