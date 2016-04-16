@@ -21,6 +21,8 @@ namespace UnityStandardAssets._2D
 		const int k_ExtraJumps = 1;
 		private int m_RemainingJumps;
 
+		public Vector3 m_LastCheckpoint;
+
         private void Awake()
         {
             // Setting up references.
@@ -29,6 +31,8 @@ namespace UnityStandardAssets._2D
             //m_Anim = GetComponent<Animator>();
 			m_Anim = GetComponentInChildren<Animator>();
             m_Rigidbody2D = GetComponent<Rigidbody2D>();
+
+			m_LastCheckpoint = transform.position;
         }
 
 
