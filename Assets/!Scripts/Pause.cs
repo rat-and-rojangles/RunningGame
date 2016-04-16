@@ -3,8 +3,6 @@ using System.Collections;
 
 public class Pause : MonoBehaviour {
 
-	//[SerializeField]
-
 	private bool paused = false;
 	private AudioLowPassFilter musicLowPass;
 
