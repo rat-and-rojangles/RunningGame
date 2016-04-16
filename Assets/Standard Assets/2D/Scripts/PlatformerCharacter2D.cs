@@ -61,6 +61,7 @@ namespace UnityStandardAssets._2D
 
         public void Move(float move, bool jump)
         {
+			m_Anim.SetBool("JumpFire", jump);
             //only control the player if grounded or airControl is turned on
             if (m_Grounded || m_AirControl)
             {
@@ -74,6 +75,7 @@ namespace UnityStandardAssets._2D
 			//if (m_Grounded && jump && m_Anim.GetBool("Ground") && m_RemainingJumps > 0)
 			if (m_RemainingJumps > 0 && jump)
             {
+				//m_Anim.SetBool("JumpFire", m_Grounded);		//play the jump anim if on ground
                 // Add a vertical force to the player.
                 m_Grounded = false;
                 m_Anim.SetBool("Ground", false);
