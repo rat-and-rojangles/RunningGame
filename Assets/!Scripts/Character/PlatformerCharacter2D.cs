@@ -55,13 +55,18 @@ public class PlatformerCharacter2D : MonoBehaviour
     public void Move(float move, bool jump)
     {
 		m_Anim.SetBool("JumpFire", false);
+        //only control the player if grounded or airControl is turned on
+        if (m_Grounded || m_AirControl)
+        {
+            // The Speed animator parameter is set to the value of the horizontal input. CAN BE NEGATIVE
+			m_Anim.SetFloat("Speed", move);
+			if (move < 0) {
+				
+			}
 
-        // The Speed animator parameter is set to the value of the horizontal input. CAN BE NEGATIVE
-		m_Anim.SetFloat("Speed", move);
-
-        // Move the character
-        m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed, m_Rigidbody2D.velocity.y);
-
+            // Move the character
+            m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed, m_Rigidbody2D.velocity.y);
+        }
         // If the player should jump...
 		if (m_RemainingJumps > 0 && jump)
         {
