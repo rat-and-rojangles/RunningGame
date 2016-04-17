@@ -17,7 +17,9 @@ public class PlatformerCharacter2D : MonoBehaviour
 	const int k_ExtraJumps = 1;
 	private int m_RemainingJumps;
 
-	public Vector3 lastCheckpoint;
+	public Vector3 lastCheckpoint;	//player should run into this near beginning
+
+	private AutoMoveLevel aml;
 
     private void Awake()
     {
@@ -27,7 +29,7 @@ public class PlatformerCharacter2D : MonoBehaviour
 		m_Anim = GetComponentInChildren<Animator>();
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
 
-		lastCheckpoint = transform.position;	//first checkpoint is start
+		aml = GameObject.FindGameObjectWithTag ("GameController").GetComponent<AutoMoveLevel> ();
     }
 
 
@@ -65,7 +67,8 @@ public class PlatformerCharacter2D : MonoBehaviour
 			}
 
             // Move the character
-            m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed, m_Rigidbody2D.velocity.y);
+			m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed + aml.speed, m_Rigidbody2D.velocity.y);
+			//m_Rigidbody2D.position += Vector2.right * move * m_MaxSpeed * Time.fixedDeltaTime;
         }
         // If the player should jump...
 		if (m_RemainingJumps > 0 && jump)
@@ -83,6 +86,8 @@ public class PlatformerCharacter2D : MonoBehaviour
     }
 
 	public void Die(){
+		print ("u gone boi");
+
 		m_Rigidbody2D.position = lastCheckpoint;
 
 		Transform tempCam = GameObject.FindGameObjectWithTag ("CameraController").transform;
@@ -94,7 +99,8 @@ public class PlatformerCharacter2D : MonoBehaviour
 
 	void OnTriggerEnter2D(Collider2D other){
 		if (other.tag.Equals ("Respawn")) {
-			lastCheckpoint = other.transform.position;
+			print ("new checkpoint registered");
+			lastCheckpoint = transform.position;
 		} else if (other.tag.Equals ("Deadly")) {
 			Die ();
 		}

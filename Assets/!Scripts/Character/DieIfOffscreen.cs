@@ -7,7 +7,7 @@ public class DieIfOffscreen : MonoBehaviour {
 
 	private GameObject player;
 
-	[SerializeField] float margin = 0.15f; //remember this is viewport space, so it's this percent of a screen
+	[SerializeField] float margin = 0.075f; //remember this is viewport space, so it's this percent of a screen
 
 	void Awake () {
 		mainCam = GameObject.FindGameObjectWithTag ("MainCamera").GetComponent<Camera> ();
@@ -20,7 +20,6 @@ public class DieIfOffscreen : MonoBehaviour {
 		float xViewport = mainCam.WorldToViewportPoint (transform.position).x;
 		//if(xViewport < -margin || xViewport > 1+margin){
 		if (xViewport < -margin) {
-			print ("u gone boi");
 			player.GetComponent<PlatformerCharacter2D> ().Die ();
 		}
 		/*else if (xViewport > 1 + margin) {
