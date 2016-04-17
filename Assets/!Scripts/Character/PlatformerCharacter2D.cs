@@ -17,6 +17,8 @@ public class PlatformerCharacter2D : MonoBehaviour
 	const int k_ExtraJumps = 1;
 	private int m_RemainingJumps;
 
+	private AutoMoveLevel aml;
+
 	public Vector3 lastCheckpoint;
 
     private void Awake()
@@ -26,6 +28,8 @@ public class PlatformerCharacter2D : MonoBehaviour
         //m_Anim = GetComponent<Animator>();
 		m_Anim = GetComponentInChildren<Animator>();
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
+
+		aml = GameObject.FindGameObjectWithTag ("GameController").GetComponent<AutoMoveLevel> ();
 
 		lastCheckpoint = transform.position;	//first checkpoint is start
     }
@@ -60,7 +64,7 @@ public class PlatformerCharacter2D : MonoBehaviour
 		m_Anim.SetFloat("Speed", move);
 
         // Move the character
-        m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed, m_Rigidbody2D.velocity.y);
+		m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed + aml.speed, m_Rigidbody2D.velocity.y);
 
         // If the player should jump...
 		if (m_RemainingJumps > 0 && jump)
