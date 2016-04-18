@@ -1,5 +1,7 @@
 fileFormatVersion: 2
 guid: 3067d36b7321e7842932d94ad2dbd80b
+timeCreated: 1461008616
+licenseType: Free
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
@@ -624,7 +626,7 @@ ModelImporter:
       transformModified: 1
     - name: B_R_Thigh
       position: {x: -0, y: -0.000000114440915, z: -0.11161452}
-      rotation: {x: -0.071485735, y: 0.9947076, z: 0.008298393, w: -0.07333294}
+      rotation: {x: -0.07148574, y: 0.99470764, z: 0.008298394, w: -0.07333295}
       scale: {x: 1, y: 0.99999994, z: 1}
       transformModified: 1
     - name: B_R_Calf
@@ -720,7 +722,7 @@ ModelImporter:
       transformModified: 1
     - name: B_L_Finger21
       position: {x: -0.051996037, y: 0, z: 0.0000001335144}
-      rotation: {x: 0.00000018217668, y: 0.0000015274933, z: -0.033460937, w: 0.99944}
+      rotation: {x: 0.00000018217669, y: 0.0000015274934, z: -0.03346094, w: 0.9994401}
       scale: {x: 1.0000002, y: 0.9999999, z: 0.99999976}
       transformModified: 1
     - name: B_L_Finger22
@@ -775,12 +777,12 @@ ModelImporter:
       transformModified: 1
     - name: B_R_UpperArm
       position: {x: -0.17464647, y: 0.00000015258789, z: 0.00000015258789}
-      rotation: {x: 0.026465472, y: 0.0285109, z: 0.008794033, w: 0.99920446}
+      rotation: {x: 0.02646547, y: 0.028510898, z: 0.008794033, w: 0.9992044}
       scale: {x: 1, y: 1.0000002, z: 0.99999976}
       transformModified: 1
     - name: B_R_Forearm
       position: {x: -0.27628177, y: 0.000000076293944, z: 0}
-      rotation: {x: 0.00050847227, y: -0.010438906, z: 0.028119588, w: 0.9995499}
+      rotation: {x: 0.0005084723, y: -0.010438907, z: 0.02811959, w: 0.99955}
       scale: {x: 0.9999997, y: 0.9999998, z: 0.9999999}
       transformModified: 1
     - name: B_R_ForeArmTwist
@@ -795,7 +797,7 @@ ModelImporter:
       transformModified: 1
     - name: B_R_Finger0
       position: {x: -0.014603157, y: 0.019355468, z: 0.02437664}
-      rotation: {x: -0.41067126, y: 0.3045638, z: 0.023629429, w: 0.85908765}
+      rotation: {x: -0.4106713, y: 0.30456382, z: 0.02362943, w: 0.8590877}
       scale: {x: 1, y: 1.0000001, z: 0.99999994}
       transformModified: 1
     - name: B_R_Finger01
@@ -810,7 +812,7 @@ ModelImporter:
       transformModified: 1
     - name: B_R_Finger1
       position: {x: -0.11625465, y: 0.031205596, z: 0.030983485}
-      rotation: {x: -0.10937348, y: 0.04780292, z: -0.104802296, w: 0.9873038}
+      rotation: {x: -0.10937349, y: 0.047802925, z: -0.1048023, w: 0.98730385}
       scale: {x: 1, y: 1.0000004, z: 1.0000002}
       transformModified: 1
     - name: B_R_Finger11
@@ -865,7 +867,7 @@ ModelImporter:
       transformModified: 1
     - name: B_R_Finger42
       position: {x: -0.033276975, y: 0.00000015258789, z: -0.0000000667572}
-      rotation: {x: -0.0000000059553926, y: -0.00000006681621, z: -0.116402194, w: 0.99320215}
+      rotation: {x: -0.000000005955393, y: -0.00000006681622, z: -0.1164022, w: 0.9932022}
       scale: {x: 0.99999994, y: 0.99999994, z: 0.99999976}
       transformModified: 1
     armTwist: 0.5
