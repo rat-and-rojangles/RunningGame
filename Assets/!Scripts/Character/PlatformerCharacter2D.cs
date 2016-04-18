@@ -6,7 +6,7 @@ using System.Collections;
 public class PlatformerCharacter2D : MonoBehaviour
 {
     [SerializeField] private float m_MaxSpeed = 10f;                    // The fastest the player can travel in the x axis.
-    [SerializeField] private float m_JumpForce = 400f;                  // Amount of force added when the player jumps.
+    [SerializeField] private float m_JumpForce = 15f;                   // Amount of force added when the player jumps.
     [SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
 
     private Transform m_GroundCheck;    // A position marking where to check if the player is grounded.
@@ -19,7 +19,6 @@ public class PlatformerCharacter2D : MonoBehaviour
 	private int m_RemainingJumps;
 
 	private AutoMoveLevel aml;
-
 	public Vector3 lastCheckpoint;
 
     private void Awake()
@@ -33,6 +32,8 @@ public class PlatformerCharacter2D : MonoBehaviour
 		aml = GameObject.FindGameObjectWithTag ("GameController").GetComponent<AutoMoveLevel> ();
 
 		lastCheckpoint = transform.position;	//first checkpoint is start
+
+		jumped = false;
     }
 
 
@@ -78,6 +79,8 @@ public class PlatformerCharacter2D : MonoBehaviour
 			tempVel.y = m_JumpForce;
 			m_Rigidbody2D.velocity = tempVel;
 			m_RemainingJumps--;
+
+			jumped = true;
 			m_Anim.SetBool("JumpFire", true);
         }
     }
@@ -99,4 +102,16 @@ public class PlatformerCharacter2D : MonoBehaviour
 			Die ();
 		}
 	}
+
+	void OnCollisionEnter2D(Collision2D c){
+		if (c.gameObject.layer == 10) {
+			print ("standing");
+		}
+	}
+	void OnCollisionStay2D(Collision2D c){
+		if (c.gameObject.layer == 10) {
+			print ("standing");
+		}
+	}
+		
 }
