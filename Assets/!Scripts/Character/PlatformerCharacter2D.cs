@@ -9,8 +9,8 @@ public class PlatformerCharacter2D : MonoBehaviour
 	[SerializeField] private float m_JumpVelocity = 15f;                // Upward velocity when the player jumps.
     [SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
 
-    private bool m_Grounded;            // Whether or not the player is grounded.
-    private Animator m_Anim;            // Reference to the player's animator component.
+	private bool m_Grounded;			// Whether or not the player is grounded.
+    private Animator m_Anim;			// Reference to the player's animator component.
 	private Rigidbody m_Rigidbody;
 	private CapsuleCollider m_Capsule;
 
@@ -20,14 +20,14 @@ public class PlatformerCharacter2D : MonoBehaviour
 	private AutoMoveLevel aml;
 	public Vector3 lastCheckpoint;
 
-	private bool groundedThisFrame;
+	private bool groundedThisFrame = true;		//used for smoothing the animator
 
-	private Vector3 m_PersonalGravity = Vector3.down * 1500;
+	[SerializeField] private float m_GravityStrength = 1500.0f;
+	private Vector3 m_PersonalGravity;
 
     private void Awake()
     {
         // Setting up references.
-        //m_Anim = GetComponent<Animator>();
 		m_Anim = GetComponentInChildren<Animator>();
         m_Rigidbody = GetComponent<Rigidbody>();
 		m_Capsule = GetComponent<CapsuleCollider>();
@@ -36,19 +36,18 @@ public class PlatformerCharacter2D : MonoBehaviour
 
 		lastCheckpoint = transform.position;	//first checkpoint is start
 
-		m_Grounded = false;
-
+		m_Grounded = true;
 		m_Rigidbody.useGravity = false;
+		m_PersonalGravity = Vector3.down * m_GravityStrength;
     }
 
 
     private void FixedUpdate()
     {
-		//m_Rigidbody2D.gravityScale = m_Grounded ? 100.0f : 3.0f;
         // Set the vertical animation
         m_Anim.SetFloat("vSpeed", m_Rigidbody.velocity.y);
 
-		m_Rigidbody.AddForce (m_PersonalGravity * Time.fixedDeltaTime);
+		m_Rigidbody.AddForce (m_PersonalGravity * Time.fixedDeltaTime);		//gravity
     }
 		
 	private void LateUpdate(){
