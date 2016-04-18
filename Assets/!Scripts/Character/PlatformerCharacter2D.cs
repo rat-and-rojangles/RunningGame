@@ -6,7 +6,7 @@ using System.Collections;
 public class PlatformerCharacter2D : MonoBehaviour
 {
     [SerializeField] private float m_MaxSpeed = 10f;                    // The fastest the player can travel in the x axis.
-    [SerializeField] private float m_JumpForce = 15f;                   // Amount of force added when the player jumps.
+	[SerializeField] private float m_JumpVelocity = 15f;                // Upward velocity when the player jumps.
     [SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
 
     private bool m_Grounded;            // Whether or not the player is grounded.
@@ -14,7 +14,7 @@ public class PlatformerCharacter2D : MonoBehaviour
 	private Rigidbody m_Rigidbody;
 	private CapsuleCollider m_Capsule;
 
-	const int k_MaxJumps = 2;
+	const int k_MaxJumps = 1;
 	private int m_RemainingJumps = 500;
 
 	private AutoMoveLevel aml;
@@ -74,7 +74,7 @@ public class PlatformerCharacter2D : MonoBehaviour
         // If the player should jump...
 		if (m_RemainingJumps > 0 && jump) {
 			// Add a vertical force to the player.
-			tempVel.y = m_JumpForce;
+			tempVel.y = m_JumpVelocity;
 			m_RemainingJumps--;
 
 			m_Anim.SetBool ("JumpFire", true);
