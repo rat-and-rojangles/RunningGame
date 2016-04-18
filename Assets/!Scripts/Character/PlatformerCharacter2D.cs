@@ -9,8 +9,6 @@ public class PlatformerCharacter2D : MonoBehaviour
     [SerializeField] private float m_JumpForce = 15f;                   // Amount of force added when the player jumps.
     [SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
 
-    private Transform m_GroundCheck;    // A position marking where to check if the player is grounded.
-    const float k_GroundedRadius = .1f; // Radius of the overlap circle to determine if grounded
     private bool m_Grounded;            // Whether or not the player is grounded.
     private Animator m_Anim;            // Reference to the player's animator component.
     private Rigidbody2D m_Rigidbody2D;
@@ -27,7 +25,6 @@ public class PlatformerCharacter2D : MonoBehaviour
     private void Awake()
     {
         // Setting up references.
-        m_GroundCheck = transform.Find("GroundCheck");
         //m_Anim = GetComponent<Animator>();
 		m_Anim = GetComponentInChildren<Animator>();
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
@@ -43,12 +40,7 @@ public class PlatformerCharacter2D : MonoBehaviour
 
     private void FixedUpdate()
     {
-		/*if (m_Grounded) {
-			Vector2 temp = m_Rigidbody2D.velocity;
-			temp.y = 0;
-			m_Rigidbody2D.velocity = temp;
-		}*/
-
+		//m_Rigidbody2D.gravityScale = m_Grounded ? 100.0f : 3.0f;
         // Set the vertical animation
         m_Anim.SetFloat("vSpeed", m_Rigidbody2D.velocity.y);
     }
@@ -72,18 +64,15 @@ public class PlatformerCharacter2D : MonoBehaviour
 		m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed + aml.speed, m_Rigidbody2D.velocity.y);
 
         // If the player should jump...
-		if (m_RemainingJumps > 0 && jump)
-        {
-            // Add a vertical force to the player.
-
-            
+		if (m_RemainingJumps > 0 && jump) {
+			// Add a vertical force to the player.
 			Vector2 tempVel = m_Rigidbody2D.velocity;
 			tempVel.y = m_JumpForce;
 			m_Rigidbody2D.velocity = tempVel;
 			m_RemainingJumps--;
 
-			m_Anim.SetBool("JumpFire", true);
-        }
+			m_Anim.SetBool ("JumpFire", true);
+		} 
     }
 
 	public void Die(){
@@ -111,7 +100,6 @@ public class PlatformerCharacter2D : MonoBehaviour
 			float angle = Mathf.Atan2 (flex.y, flex.x) * Mathf.Rad2Deg;
 			if (angle < -40 && angle > -140){
 				m_Grounded = true;
-				//m_Anim.SetBool("Ground", true);
 				m_RemainingJumps = k_MaxJumps;
 			}
 		}
@@ -121,10 +109,8 @@ public class PlatformerCharacter2D : MonoBehaviour
 		foreach (ContactPoint2D p in c.contacts) {			//detects ground
 			Vector2 flex = p.point - center;
 			float angle = Mathf.Atan2 (flex.y, flex.x) * Mathf.Rad2Deg;
-			print (angle);
 			if (angle < -40 && angle > -140){
 				m_Grounded = true;
-				//m_Anim.SetBool("Ground", true);
 				m_RemainingJumps = k_MaxJumps;
 			}
 		}
