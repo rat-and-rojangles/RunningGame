@@ -23,24 +23,25 @@ public class Platformer2DUserControl : MonoBehaviour
 
     private void Update()
     {
-		if (CrossPlatformInputManager.GetButtonDown ("Pause")) {
-			paused = !paused;
-
+		if (CrossPlatformInputManager.GetButtonDown ("Pause")) {	// Pause
 			if (paused) {
-				Time.timeScale = 0.0f;
-				StopAllCoroutines ();
-				StartCoroutine (fadeOut ());
+				Unpause ();
 			}
 			else{
-				Time.timeScale = 1.0f;
-				StopAllCoroutines ();
-				StartCoroutine (fadeIn ());
+				Pause ();
 			}
 		}
 
-		if (!m_Jump && !paused) {
+		if (!m_Jump && !paused) {	// Does not queue input while paused
 			// Read the jump input in Update so button presses aren't missed.
 			m_Jump = CrossPlatformInputManager.GetButtonDown ("Jump");
+		}
+
+		if (paused) {	// allows for restarting the level while paused
+			if (Input.GetKeyUp (KeyCode.Backspace)) {
+				m_Character.Die ();
+				Unpause ();
+			}
 		}
     }
 
@@ -53,6 +54,19 @@ public class Platformer2DUserControl : MonoBehaviour
         m_Character.Move(h, m_Jump);
         m_Jump = false;
     }
+
+	private void Pause(){
+		paused = true;
+		Time.timeScale = 0.0f;
+		StopAllCoroutines ();
+		StartCoroutine (fadeOut ());
+	}
+	private void Unpause(){
+		paused = false;
+		Time.timeScale = 1.0f;
+		StopAllCoroutines ();
+		StartCoroutine (fadeIn ());
+	}
 
 	private IEnumerator fadeIn(){
 		//while (musicLowPass.cutoffFrequency < 22000) {

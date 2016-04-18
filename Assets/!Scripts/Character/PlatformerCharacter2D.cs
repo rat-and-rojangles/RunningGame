@@ -83,6 +83,7 @@ public class PlatformerCharacter2D : MonoBehaviour
     }
 
 	public void Die(){
+		m_Rigidbody.velocity = Vector3.zero;
 		m_Rigidbody.position = lastCheckpoint;
 
 		Transform tempCam = GameObject.FindGameObjectWithTag ("CameraController").transform;
