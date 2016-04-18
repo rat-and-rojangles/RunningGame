@@ -63,7 +63,7 @@ public class PlatformerCharacter2D : MonoBehaviour
 		m_Anim.SetBool("JumpFire", false);
 
         // The Speed animator parameter is set to the value of the horizontal input. CAN BE NEGATIVE
-		m_Anim.SetFloat("Speed", move);
+		m_Anim.SetFloat("hAxis", move);
 
         // Move the character
 		//m_Rigidbody.velocity = new Vector2(move*m_MaxSpeed + aml.speed, m_Rigidbody.velocity.y);
