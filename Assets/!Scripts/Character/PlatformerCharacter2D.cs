@@ -14,12 +14,15 @@ public class PlatformerCharacter2D : MonoBehaviour
     private bool m_Grounded;            // Whether or not the player is grounded.
     private Animator m_Anim;            // Reference to the player's animator component.
     private Rigidbody2D m_Rigidbody2D;
+	private CircleCollider2D m_CircleCollider;
 
-	const int k_ExtraJumps = 1;
+	const int k_MaxJumps = 2;
 	private int m_RemainingJumps;
 
 	private AutoMoveLevel aml;
 	public Vector3 lastCheckpoint;
+
+	public bool groundedThisFrame;
 
     private void Awake()
     {
@@ -28,34 +31,34 @@ public class PlatformerCharacter2D : MonoBehaviour
         //m_Anim = GetComponent<Animator>();
 		m_Anim = GetComponentInChildren<Animator>();
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
+		m_CircleCollider = GetComponent<CircleCollider2D>();
 
 		aml = GameObject.FindGameObjectWithTag ("GameController").GetComponent<AutoMoveLevel> ();
 
 		lastCheckpoint = transform.position;	//first checkpoint is start
 
-		jumped = false;
+		m_Grounded = false;
     }
 
 
     private void FixedUpdate()
     {
-        m_Grounded = false;
-
-        // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
-        // This can be done using layers instead but Sample Assets will not overwrite your project settings.
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
-        for (int i = 0; i < colliders.Length; i++)
-        {
-			if (colliders [i].gameObject != gameObject) {
-				m_Grounded = true;
-				m_RemainingJumps = k_ExtraJumps;
-			}
-        }
-        m_Anim.SetBool("Ground", m_Grounded);
+		/*if (m_Grounded) {
+			Vector2 temp = m_Rigidbody2D.velocity;
+			temp.y = 0;
+			m_Rigidbody2D.velocity = temp;
+		}*/
 
         // Set the vertical animation
         m_Anim.SetFloat("vSpeed", m_Rigidbody2D.velocity.y);
     }
+		
+	private void LateUpdate(){
+		m_Anim.SetBool ("Ground", m_Grounded || groundedThisFrame);		//for smoothing
+
+		groundedThisFrame = m_Grounded;
+		//m_Grounded = groundedThisFrame;
+	}
 
 
     public void Move(float move, bool jump)
@@ -72,15 +75,13 @@ public class PlatformerCharacter2D : MonoBehaviour
 		if (m_RemainingJumps > 0 && jump)
         {
             // Add a vertical force to the player.
-            m_Grounded = false;
-            m_Anim.SetBool("Ground", false);
+
             
 			Vector2 tempVel = m_Rigidbody2D.velocity;
 			tempVel.y = m_JumpForce;
 			m_Rigidbody2D.velocity = tempVel;
 			m_RemainingJumps--;
 
-			jumped = true;
 			m_Anim.SetBool("JumpFire", true);
         }
     }
@@ -104,14 +105,31 @@ public class PlatformerCharacter2D : MonoBehaviour
 	}
 
 	void OnCollisionEnter2D(Collision2D c){
-		if (c.gameObject.layer == 10) {
-			print ("standing");
+		Vector2 center = m_CircleCollider.bounds.center;
+		foreach (ContactPoint2D p in c.contacts) {			//detects ground
+			Vector2 flex = p.point - center;
+			float angle = Mathf.Atan2 (flex.y, flex.x) * Mathf.Rad2Deg;
+			if (angle < -40 && angle > -140){
+				m_Grounded = true;
+				//m_Anim.SetBool("Ground", true);
+				m_RemainingJumps = k_MaxJumps;
+			}
 		}
 	}
 	void OnCollisionStay2D(Collision2D c){
-		if (c.gameObject.layer == 10) {
-			print ("standing");
+		Vector2 center = m_CircleCollider.bounds.center;
+		foreach (ContactPoint2D p in c.contacts) {			//detects ground
+			Vector2 flex = p.point - center;
+			float angle = Mathf.Atan2 (flex.y, flex.x) * Mathf.Rad2Deg;
+			print (angle);
+			if (angle < -40 && angle > -140){
+				m_Grounded = true;
+				//m_Anim.SetBool("Ground", true);
+				m_RemainingJumps = k_MaxJumps;
+			}
 		}
 	}
-		
+	void OnCollisionExit2D(Collision2D c){
+		m_Grounded = false;
+	}
 }

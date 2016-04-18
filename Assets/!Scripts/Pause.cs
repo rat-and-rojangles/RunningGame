@@ -31,18 +31,22 @@ public class Pause : MonoBehaviour {
 	}
 
 	private IEnumerator fadeIn(){
-		while (musicLowPass.cutoffFrequency < 22000) {
-			print ("i");
+		//while (musicLowPass.cutoffFrequency < 22000) {
+		while (musicLowPass.cutoffFrequency < 21999) {
+			//print ("i");
 			musicLowPass.cutoffFrequency = Mathf.Lerp (musicLowPass.cutoffFrequency, 22000, 3 * Time.unscaledDeltaTime);
 			yield return null;
 		}
+		musicLowPass.cutoffFrequency = 22000;
 	}
 
 	private IEnumerator fadeOut(){
-		while (musicLowPass.cutoffFrequency > minFQ) {
-			print ("o");
+		while (musicLowPass.cutoffFrequency > minFQ+1) {
+			//print ("o");
 			musicLowPass.cutoffFrequency = Mathf.Lerp (musicLowPass.cutoffFrequency, minFQ, 6 * Time.unscaledDeltaTime);
 			yield return null;
 		}
+		musicLowPass.cutoffFrequency = minFQ-1;
 	}
+
 }
