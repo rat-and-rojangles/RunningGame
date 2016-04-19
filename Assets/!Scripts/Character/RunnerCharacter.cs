@@ -103,13 +103,7 @@ public class RunnerCharacter : MonoBehaviour
 		tempCam.position = tempCamPos;
 	}
 
-	void OnTriggerEnter(Collider other){
-		if (other.tag.Equals ("Respawn")) {
-			lastCheckpoint = other.transform.position;
-		} else if (other.tag.Equals ("Deadly")) {
-			Die ();
-		}
-	}
+
 
 	void OnCollisionEnter(Collision c){
 		Vector2 center = m_Capsule.bounds.center;
@@ -135,5 +129,18 @@ public class RunnerCharacter : MonoBehaviour
 	}
 	void OnCollisionExit(Collision c){
 		m_Grounded = false;
+	}
+
+
+	void OnTriggerEnter(Collider other){
+		if (other.tag.Equals ("Respawn")) {
+			lastCheckpoint = transform.position;
+		} else if (other.tag.Equals ("Deadly")) {
+			Die ();
+		} else if (other.tag.Equals ("Collectible")) {
+			Destroy (other.gameObject);
+			print ("collected");
+		}
+
 	}
 }

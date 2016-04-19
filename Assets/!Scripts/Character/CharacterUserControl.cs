@@ -12,7 +12,7 @@ public class CharacterUserControl : MonoBehaviour
 	//pause
 	private bool paused = false;
 	private AudioLowPassFilter musicLowPass;
-	private const float minFQ = 450.0f;
+	[SerializeField] private float musicMinFQ = 450.0f;
 
     private void Awake()
     {
@@ -79,11 +79,11 @@ public class CharacterUserControl : MonoBehaviour
 	}
 
 	private IEnumerator fadeOut(){
-		while (musicLowPass.cutoffFrequency > minFQ+1) {
+		while (musicLowPass.cutoffFrequency > musicMinFQ+1) {
 			//print ("o");
-			musicLowPass.cutoffFrequency = Mathf.Lerp (musicLowPass.cutoffFrequency, minFQ, 6 * Time.unscaledDeltaTime);
+			musicLowPass.cutoffFrequency = Mathf.Lerp (musicLowPass.cutoffFrequency, musicMinFQ, 6 * Time.unscaledDeltaTime);
 			yield return null;
 		}
-		musicLowPass.cutoffFrequency = minFQ-1;
+		musicLowPass.cutoffFrequency = musicMinFQ-1;
 	}
 }
