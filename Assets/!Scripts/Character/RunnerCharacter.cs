@@ -3,7 +3,7 @@ using UnityEngine;
 
 using System.Collections;
 
-public class PlatformerCharacter2D : MonoBehaviour
+public class RunnerCharacter : MonoBehaviour
 {
     [SerializeField] private float m_MaxSpeed = 10f;                    // The fastest the player can travel in the x axis.
 	[SerializeField] private float m_JumpVelocity = 15f;                // Upward velocity when the player jumps.

@@ -21,7 +21,7 @@ public class DieIfOffscreen : MonoBehaviour {
 		//if(xViewport < -margin || xViewport > 1+margin){
 		if (xViewport < -margin) {
 			print ("u gone boi");
-			player.GetComponent<PlatformerCharacter2D> ().Die ();
+			player.GetComponent<RunnerCharacter> ().Die ();
 		}
 		/*else if (xViewport > 1 + margin) {
 			Vector3 jj = new Vector3(mainCam.ViewportToWorldPoint()

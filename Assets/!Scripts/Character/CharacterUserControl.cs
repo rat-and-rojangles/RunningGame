@@ -3,10 +3,10 @@ using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 using System.Collections;
 
-[RequireComponent(typeof (PlatformerCharacter2D))]
-public class Platformer2DUserControl : MonoBehaviour
+[RequireComponent(typeof (RunnerCharacter))]
+public class CharacterUserControl : MonoBehaviour
 {
-    private PlatformerCharacter2D m_Character;
+    private RunnerCharacter m_Character;
     private bool m_Jump;
 
 	//pause
@@ -16,7 +16,7 @@ public class Platformer2DUserControl : MonoBehaviour
 
     private void Awake()
     {
-        m_Character = GetComponent<PlatformerCharacter2D>();
+        m_Character = GetComponent<RunnerCharacter>();
 		musicLowPass = GameObject.FindGameObjectWithTag ("MusicController").GetComponent<AudioLowPassFilter> ();
     }
 
