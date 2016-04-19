@@ -44,6 +44,10 @@ public class PlatformerCharacter2D : MonoBehaviour
 
     private void FixedUpdate()
     {
+		if (Input.GetKey (KeyCode.Backspace)) {
+			m_Rigidbody.AddForce (-2 * m_PersonalGravity * Time.fixedDeltaTime);	
+		}
+
         // Set the vertical animation
         m_Anim.SetFloat("vSpeed", m_Rigidbody.velocity.y);
 
@@ -51,15 +55,17 @@ public class PlatformerCharacter2D : MonoBehaviour
     }
 		
 	private void LateUpdate(){
-		m_Anim.SetBool ("Ground", m_Grounded || groundedThisFrame);		//for smoothing
-
-		groundedThisFrame = m_Grounded;
+		/*m_Anim.SetBool ("Ground", m_Grounded || groundedThisFrame);		//for smoothing
+		groundedThisFrame = m_Grounded;*/
 		//m_Grounded = groundedThisFrame;
 	}
 
 
     public void Move(float move, bool jump)
     {
+		m_Anim.SetBool ("Ground", m_Grounded || groundedThisFrame);		//for smoothing
+		groundedThisFrame = m_Grounded;
+
 		m_Anim.SetBool("JumpFire", false);
 
         // The Speed animator parameter is set to the value of the horizontal input. CAN BE NEGATIVE
@@ -76,13 +82,17 @@ public class PlatformerCharacter2D : MonoBehaviour
 			tempVel.y = m_JumpVelocity;
 			m_RemainingJumps--;
 
+			m_Grounded = false;
+			groundedThisFrame = false;
 			m_Anim.SetBool ("JumpFire", true);
+			m_Anim.SetBool ("Ground", false);
 		} 
 
 		m_Rigidbody.velocity = tempVel;
     }
 
 	public void Die(){
+		m_Anim.Play ("Running");
 		m_Rigidbody.velocity = Vector3.zero;
 		m_Rigidbody.position = lastCheckpoint;
 
