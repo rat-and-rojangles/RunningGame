@@ -19,11 +19,14 @@ public class RunnerCharacter : MonoBehaviour
 
 	private AutoMoveLevel aml;
 	public Vector3 lastCheckpoint;
+	private Transform m_CamOffset;
 
 	private bool groundedThisFrame = true;		//used for smoothing the animator
 
 	[SerializeField] private float m_GravityStrength = 1500.0f;
 	private Vector3 m_PersonalGravity;
+
+	public bool sidestepMode = false;
 
     private void Awake()
     {
@@ -33,6 +36,7 @@ public class RunnerCharacter : MonoBehaviour
 		m_Capsule = GetComponent<CapsuleCollider>();
 
 		aml = GameObject.FindGameObjectWithTag ("GameController").GetComponent<AutoMoveLevel> ();
+		m_CamOffset = GameObject.FindGameObjectWithTag ("CamOffset").transform;
 
 		lastCheckpoint = transform.position;	//first checkpoint is start
 
@@ -44,7 +48,7 @@ public class RunnerCharacter : MonoBehaviour
 
     private void FixedUpdate()
     {
-		if (Input.GetKey (KeyCode.Backspace)) {
+		if (Input.GetKey (KeyCode.Backspace)) {								//floating cheat
 			m_Rigidbody.AddForce (-2 * m_PersonalGravity * Time.fixedDeltaTime);	
 		}
 
@@ -54,31 +58,32 @@ public class RunnerCharacter : MonoBehaviour
 		m_Rigidbody.AddForce (m_PersonalGravity * Time.fixedDeltaTime);		//gravity
     }
 		
-	private void LateUpdate(){
-		/*m_Anim.SetBool ("Ground", m_Grounded || groundedThisFrame);		//for smoothing
-		groundedThisFrame = m_Grounded;*/
-		//m_Grounded = groundedThisFrame;
-	}
 
-
-    public void Move(float move, bool jump)
-    {
+	public void Move(float hAxis, float vAxis, bool jump) {
 		m_Anim.SetBool ("Ground", m_Grounded || groundedThisFrame);		//for smoothing
 		groundedThisFrame = m_Grounded;
 
 		m_Anim.SetBool("JumpFire", false);
 
-        // The Speed animator parameter is set to the value of the horizontal input. CAN BE NEGATIVE
-		m_Anim.SetFloat("hAxis", move);
+		// processes input based on movement mode
+		float moveX, moveZ;
+		if (sidestepMode) {
+			moveX = vAxis;
+			moveZ = -hAxis;
+		} else {
+			moveX = hAxis;
+			moveZ = 0.0f;
+		}
 
-        // Move the character
-		//m_Rigidbody.velocity = new Vector2(move*m_MaxSpeed + aml.speed, m_Rigidbody.velocity.y);
+		print (moveZ);
+
+		// Move the character
 		Vector3 tempVel = m_Rigidbody.velocity;
-		tempVel.x = move * m_MaxSpeed + aml.speed;
+		tempVel.x = moveX * m_MaxSpeed + aml.speed;
+		tempVel.z = moveZ * m_MaxSpeed;
 
-        // If the player should jump...
+		// If the player should jump...
 		if (m_RemainingJumps > 0 && jump) {
-			// Add a vertical force to the player.
 			tempVel.y = m_JumpVelocity;
 			m_RemainingJumps--;
 
@@ -89,7 +94,25 @@ public class RunnerCharacter : MonoBehaviour
 		} 
 
 		m_Rigidbody.velocity = tempVel;
-    }
+	}
+
+	private void StartSidestepMode(){
+		sidestepMode = true;
+		//m_CamOffset.rotation = Quaternion.Euler (new Vector3 (0, 90, 0));
+		StartCoroutine(TwistCameraSidestep());
+		m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+	}
+
+	private IEnumerator TwistCameraSidestep(){
+		Quaternion tempQ = m_CamOffset.rotation;
+		Vector3 tempRot = m_CamOffset.rotation.eulerAngles;
+		while (m_CamOffset.rotation.eulerAngles.y < 90){
+			tempRot.y = Mathf.Lerp (m_CamOffset.rotation.eulerAngles.y, 90, Time.deltaTime * 20);
+			tempQ.eulerAngles = tempRot;
+			m_CamOffset.rotation = tempQ;
+			yield return null;
+		}
+	}
 
 	public void Die(){
 		m_Anim.Play ("Running");
@@ -140,6 +163,8 @@ public class RunnerCharacter : MonoBehaviour
 		} else if (other.tag.Equals ("Collectible")) {
 			Destroy (other.gameObject);
 			print ("collected");
+		} else if (other.tag.Equals ("SidestepMode")) {
+			StartSidestepMode ();
 		}
 
 	}

@@ -50,8 +50,12 @@ public class CharacterUserControl : MonoBehaviour
     {
         // Read the horizontal input.
         float h = CrossPlatformInputManager.GetAxis("Horizontal");
+		float v = CrossPlatformInputManager.GetAxis("Vertical");
+
+		print (v);
+
         // Pass all parameters to the character control script.
-        m_Character.Move(h, m_Jump);
+		m_Character.Move(h, v, m_Jump);
         m_Jump = false;
     }
 
