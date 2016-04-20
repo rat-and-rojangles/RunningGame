@@ -8,6 +8,8 @@ public class CharacterUserControl : MonoBehaviour
 {
     private RunnerCharacter m_Character;
     private bool m_Jump;
+	private bool m_Left;
+	private bool m_Right;
 
 	//pause
 	private bool paused = false;
@@ -32,9 +34,17 @@ public class CharacterUserControl : MonoBehaviour
 			}
 		}
 
-		if (!m_Jump && !paused) {	// Does not queue input while paused
-			// Read the jump input in Update so button presses aren't missed.
-			m_Jump = CrossPlatformInputManager.GetButtonDown ("Jump");
+		// Read the button inputs in Update so button presses aren't missed.
+		if (!paused) {	// Does not queue input while paused
+			if (!m_Jump) {	
+				m_Jump = CrossPlatformInputManager.GetButtonDown ("Jump");
+			}
+			if (!m_Left) {	
+				m_Left = CrossPlatformInputManager.GetButtonDown ("Left");
+			}
+			if (!m_Right) {	
+				m_Right = CrossPlatformInputManager.GetButtonDown ("Right");
+			}
 		}
 
 		if (paused) {	// allows for restarting the level while paused
@@ -52,11 +62,11 @@ public class CharacterUserControl : MonoBehaviour
         float h = CrossPlatformInputManager.GetAxis("Horizontal");
 		float v = CrossPlatformInputManager.GetAxis("Vertical");
 
-		print (v);
-
         // Pass all parameters to the character control script.
-		m_Character.Move(h, v, m_Jump);
+		m_Character.Move(h, v, m_Jump, m_Left, m_Right);
         m_Jump = false;
+		m_Left = false;
+		m_Right = false;
     }
 
 	private void Pause(){
@@ -73,21 +83,18 @@ public class CharacterUserControl : MonoBehaviour
 	}
 
 	private IEnumerator fadeIn(){
-		//while (musicLowPass.cutoffFrequency < 22000) {
 		while (musicLowPass.cutoffFrequency < 21999) {
-			//print ("i");
 			musicLowPass.cutoffFrequency = Mathf.Lerp (musicLowPass.cutoffFrequency, 22000, 3 * Time.unscaledDeltaTime);
 			yield return null;
 		}
-		musicLowPass.cutoffFrequency = 22000;
+		musicLowPass.cutoffFrequency = 22000f;
 	}
 
 	private IEnumerator fadeOut(){
 		while (musicLowPass.cutoffFrequency > musicMinFQ+1) {
-			//print ("o");
 			musicLowPass.cutoffFrequency = Mathf.Lerp (musicLowPass.cutoffFrequency, musicMinFQ, 6 * Time.unscaledDeltaTime);
 			yield return null;
 		}
-		musicLowPass.cutoffFrequency = musicMinFQ-1;
+		musicLowPass.cutoffFrequency = musicMinFQ;
 	}
 }

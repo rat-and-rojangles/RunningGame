@@ -27,6 +27,8 @@ public class RunnerCharacter : MonoBehaviour
 	private Vector3 m_PersonalGravity;
 
 	public bool sidestepMode = false;
+	private int rail = 0;					// 1 is left, -1 is right
+	private const float k_RailWidth = 5.0f;
 
     private void Awake()
     {
@@ -59,7 +61,7 @@ public class RunnerCharacter : MonoBehaviour
     }
 		
 
-	public void Move(float hAxis, float vAxis, bool jump) {
+	public void Move(float hAxis, float vAxis, bool jump, bool left, bool right) {
 		m_Anim.SetBool ("Ground", m_Grounded || groundedThisFrame);		//for smoothing
 		groundedThisFrame = m_Grounded;
 
@@ -70,17 +72,28 @@ public class RunnerCharacter : MonoBehaviour
 		if (sidestepMode) {
 			moveX = vAxis;
 			moveZ = -hAxis;
-		} else {
+
+			//rails
+			if (left && !right && rail != 1) {
+				rail += 1;
+				ChangeRail ();
+			}
+			else if (right && !left && rail != -1) {
+				rail -= 1;
+				ChangeRail ();
+			}
+		}
+		else {
 			moveX = hAxis;
 			moveZ = 0.0f;
 		}
+			
 
-		print (moveZ);
 
 		// Move the character
 		Vector3 tempVel = m_Rigidbody.velocity;
 		tempVel.x = moveX * m_MaxSpeed + aml.speed;
-		tempVel.z = moveZ * m_MaxSpeed;
+		//tempVel.z = moveZ * m_MaxSpeed;
 
 		// If the player should jump...
 		if (m_RemainingJumps > 0 && jump) {
@@ -96,20 +109,49 @@ public class RunnerCharacter : MonoBehaviour
 		m_Rigidbody.velocity = tempVel;
 	}
 
+	private void ChangeRail(){
+		Vector3 tempPos = transform.position;
+		tempPos.z = rail * k_RailWidth;
+		transform.position = tempPos;
+	}
+
 	private void StartSidestepMode(){
 		sidestepMode = true;
-		//m_CamOffset.rotation = Quaternion.Euler (new Vector3 (0, 90, 0));
-		StartCoroutine(TwistCameraSidestep());
+		StopAllCoroutines ();
+		StartCoroutine (CameraSidestepAngle ());
 		m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 	}
 
-	private IEnumerator TwistCameraSidestep(){
+	private void Start2DMode(){
+		sidestepMode = false;
+		rail = 0;
+		StopAllCoroutines ();
+		StartCoroutine (Camera2DAngle ());
+		ChangeRail ();	//sets character back to center
+		m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
+	}
+
+	private IEnumerator CameraSidestepAngle(){
 		Quaternion tempQ = m_CamOffset.rotation;
 		Vector3 tempRot = m_CamOffset.rotation.eulerAngles;
+		int rate = 10;
 		while (m_CamOffset.rotation.eulerAngles.y < 90){
-			tempRot.y = Mathf.Lerp (m_CamOffset.rotation.eulerAngles.y, 90, Time.deltaTime * 20);
+			tempRot.y = Mathf.Lerp (m_CamOffset.rotation.eulerAngles.y, 90, Time.deltaTime * rate);
 			tempQ.eulerAngles = tempRot;
 			m_CamOffset.rotation = tempQ;
+			rate++;
+			yield return null;
+		}
+	}
+	private IEnumerator Camera2DAngle(){
+		Quaternion tempQ = m_CamOffset.rotation;
+		Vector3 tempRot = m_CamOffset.rotation.eulerAngles;
+		int rate = 10;
+		while (m_CamOffset.rotation.eulerAngles.y > 0){
+			tempRot.y = Mathf.Lerp (m_CamOffset.rotation.eulerAngles.y, 0, Time.deltaTime * rate);
+			tempQ.eulerAngles = tempRot;
+			m_CamOffset.rotation = tempQ;
+			rate++;
 			yield return null;
 		}
 	}
@@ -125,8 +167,6 @@ public class RunnerCharacter : MonoBehaviour
 		tempCamPos.x = lastCheckpoint.x;
 		tempCam.position = tempCamPos;
 	}
-
-
 
 	void OnCollisionEnter(Collision c){
 		Vector2 center = m_Capsule.bounds.center;
@@ -162,9 +202,14 @@ public class RunnerCharacter : MonoBehaviour
 			Die ();
 		} else if (other.tag.Equals ("Collectible")) {
 			Destroy (other.gameObject);
-			print ("collected");
 		} else if (other.tag.Equals ("SidestepMode")) {
 			StartSidestepMode ();
+		}
+		else if (other.tag.Equals ("SidestepMode")) {
+			StartSidestepMode ();
+		}
+		else if (other.tag.Equals ("2DMode")) {
+			Start2DMode ();
 		}
 
 	}
