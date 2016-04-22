@@ -62,12 +62,11 @@ public class RunnerCharacter : MonoBehaviour
 		m_Rigidbody.AddForce (m_PersonalGravity * Time.fixedDeltaTime);		//gravity
 
 		if (sidestepMode) {
+			//Forward backward stuff
 			if (transform.position.x > perfectPosition.position.x) {
-				print ("fw");
 				m_Rigidbody.AddForce (Vector3.left * (transform.position.x - perfectPosition.position.x) * 150);
 			}
 			else if (transform.position.x < perfectPosition.position.x) {
-				print ("bw");
 				m_Rigidbody.AddForce (Vector3.right * (perfectPosition.position.x - transform.position.x) * 150);
 			}
 		}
@@ -128,6 +127,7 @@ public class RunnerCharacter : MonoBehaviour
 		transform.position = tempPos;
 	}
 
+
 	private void StartSidestepMode(){
 		sidestepMode = true;
 		StopAllCoroutines ();
@@ -141,7 +141,8 @@ public class RunnerCharacter : MonoBehaviour
 		StopAllCoroutines ();
 		StartCoroutine (Camera2DAngle ());
 		ChangeRail ();	//sets character back to center
-		m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
+		//m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
+		m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 	}
 
 	private IEnumerator CameraSidestepAngle(){
@@ -224,6 +225,5 @@ public class RunnerCharacter : MonoBehaviour
 		else if (other.tag.Equals ("2DMode")) {
 			Start2DMode ();
 		}
-
 	}
 }
