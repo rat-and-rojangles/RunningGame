@@ -18,7 +18,7 @@ public class RunnerCharacter : MonoBehaviour
 	private int m_RemainingJumps = 500;
 
 	private AutoMoveLevel aml;
-	public Vector3 lastCheckpoint;
+	private Vector3 lastCheckpoint;
 	private Transform m_CamOffset;
 
 	private bool groundedThisFrame = true;		//used for smoothing the animator
@@ -26,9 +26,11 @@ public class RunnerCharacter : MonoBehaviour
 	[SerializeField] private float m_GravityStrength = 1500.0f;
 	private Vector3 m_PersonalGravity;
 
-	public bool sidestepMode = false;
+	private bool sidestepMode = false;
 	private int rail = 0;					// 1 is left, -1 is right
 	private const float k_RailWidth = 5.0f;
+
+	public Transform perfectPosition;
 
     private void Awake()
     {
@@ -50,14 +52,25 @@ public class RunnerCharacter : MonoBehaviour
 
     private void FixedUpdate()
     {
-		if (Input.GetKey (KeyCode.Backspace)) {								//floating cheat
+		/*if (Input.GetKey (KeyCode.Backspace)) {								//floating cheat
 			m_Rigidbody.AddForce (-2 * m_PersonalGravity * Time.fixedDeltaTime);	
-		}
+		}*/
 
         // Set the vertical animation
         m_Anim.SetFloat("vSpeed", m_Rigidbody.velocity.y);
 
 		m_Rigidbody.AddForce (m_PersonalGravity * Time.fixedDeltaTime);		//gravity
+
+		if (sidestepMode) {
+			if (transform.position.x > perfectPosition.position.x) {
+				print ("fw");
+				m_Rigidbody.AddForce (Vector3.left * (transform.position.x - perfectPosition.position.x) * 150);
+			}
+			else if (transform.position.x < perfectPosition.position.x) {
+				print ("bw");
+				m_Rigidbody.AddForce (Vector3.right * (perfectPosition.position.x - transform.position.x) * 150);
+			}
+		}
     }
 		
 
@@ -119,7 +132,7 @@ public class RunnerCharacter : MonoBehaviour
 		sidestepMode = true;
 		StopAllCoroutines ();
 		StartCoroutine (CameraSidestepAngle ());
-		m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+		//m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 	}
 
 	private void Start2DMode(){
