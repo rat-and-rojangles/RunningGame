@@ -58,8 +58,6 @@ public class RunnerCharacter : MonoBehaviour
 			m_Rigidbody.AddForce (-2 * m_PersonalGravity * Time.fixedDeltaTime);	
 		}*/
 
-		print (canChangeRail);
-
         // Set the vertical animation
         m_Anim.SetFloat("vSpeed", m_Rigidbody.velocity.y);
 
@@ -102,12 +100,10 @@ public class RunnerCharacter : MonoBehaviour
 			if (canChangeRail) {
 				if (left && !right && rail != 1) {
 					rail += 1;
-					print ("falseLeft");
 					canChangeRail = false;
 				} 
 				else if (right && !left && rail != -1) {
 					rail -= 1;
-					print ("falseRight");
 					canChangeRail = false;
 				}
 			}
@@ -147,7 +143,6 @@ public class RunnerCharacter : MonoBehaviour
 		tempPos.z = rail * k_RailWidth;
 		transform.position = tempPos;
 
-		print ("ccr");
 		canChangeRail = true;
 	}
 
@@ -197,7 +192,9 @@ public class RunnerCharacter : MonoBehaviour
 	public void Die(){
 		m_Anim.Play ("Running");
 		m_Rigidbody.velocity = Vector3.zero;
-		m_Rigidbody.position = lastCheckpoint;
+		transform.position = lastCheckpoint;
+		rail = 0;
+		ChangeRail ();
 
 		Transform tempCam = GameObject.FindGameObjectWithTag ("CameraController").transform;
 
@@ -249,7 +246,7 @@ public class RunnerCharacter : MonoBehaviour
 		else if (other.tag.Equals ("2DMode")) {
 			Start2DMode ();
 		}
-		else if (other.tag.Equals ("Rail")) {
+		else if (other.tag.Equals ("Rail") && sidestepMode) {
 			ChangeRail ();
 		}
 	}
