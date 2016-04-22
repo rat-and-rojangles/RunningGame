@@ -74,11 +74,11 @@ public class RunnerCharacter : MonoBehaviour
 
 			if (transform.position.z > rail * k_RailWidth) {
 				//m_Rigidbody.AddForce (Vector3.back * (transform.position.z - rail * k_RailWidth) * 150);
-				m_Rigidbody.AddForce (Vector3.back * 150);
+				m_Rigidbody.AddForce (Vector3.back * (transform.position.z - rail * k_RailWidth) * 100);
 			}
 			else if (transform.position.z < rail * k_RailWidth) {
 				//m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.b) * 150);
-				m_Rigidbody.AddForce (Vector3.forward * 150);
+				m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * 100);
 			}
 		}
     }
