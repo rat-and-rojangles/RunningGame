@@ -30,6 +30,8 @@ public class RunnerCharacter : MonoBehaviour
 	private int rail = 0;					// 1 is left, -1 is right
 	private const float k_RailWidth = 5.0f;
 
+	private bool canChangeRail = true;
+
 	public Transform perfectPosition;
 
     private void Awake()
@@ -56,6 +58,8 @@ public class RunnerCharacter : MonoBehaviour
 			m_Rigidbody.AddForce (-2 * m_PersonalGravity * Time.fixedDeltaTime);	
 		}*/
 
+		print (canChangeRail);
+
         // Set the vertical animation
         m_Anim.SetFloat("vSpeed", m_Rigidbody.velocity.y);
 
@@ -68,6 +72,15 @@ public class RunnerCharacter : MonoBehaviour
 			}
 			else if (transform.position.x < perfectPosition.position.x) {
 				m_Rigidbody.AddForce (Vector3.right * (perfectPosition.position.x - transform.position.x) * 150);
+			}
+
+			if (transform.position.z > rail * k_RailWidth) {
+				//m_Rigidbody.AddForce (Vector3.back * (transform.position.z - rail * k_RailWidth) * 150);
+				m_Rigidbody.AddForce (Vector3.back * 150);
+			}
+			else if (transform.position.z < rail * k_RailWidth) {
+				//m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.b) * 150);
+				m_Rigidbody.AddForce (Vector3.forward * 150);
 			}
 		}
     }
@@ -86,13 +99,17 @@ public class RunnerCharacter : MonoBehaviour
 			moveZ = -hAxis;
 
 			//rails
-			if (left && !right && rail != 1) {
-				rail += 1;
-				ChangeRail ();
-			}
-			else if (right && !left && rail != -1) {
-				rail -= 1;
-				ChangeRail ();
+			if (canChangeRail) {
+				if (left && !right && rail != 1) {
+					rail += 1;
+					print ("falseLeft");
+					canChangeRail = false;
+				} 
+				else if (right && !left && rail != -1) {
+					rail -= 1;
+					print ("falseRight");
+					canChangeRail = false;
+				}
 			}
 		}
 		else {
@@ -122,9 +139,16 @@ public class RunnerCharacter : MonoBehaviour
 	}
 
 	private void ChangeRail(){
+		Vector3 tempVel = m_Rigidbody.velocity;
+		tempVel.z = 0.0f;
+		m_Rigidbody.velocity = tempVel;
+
 		Vector3 tempPos = transform.position;
 		tempPos.z = rail * k_RailWidth;
 		transform.position = tempPos;
+
+		print ("ccr");
+		canChangeRail = true;
 	}
 
 
@@ -138,9 +162,9 @@ public class RunnerCharacter : MonoBehaviour
 	private void Start2DMode(){
 		sidestepMode = false;
 		rail = 0;
+		ChangeRail ();	//sets character back to center
 		StopAllCoroutines ();
 		StartCoroutine (Camera2DAngle ());
-		ChangeRail ();	//sets character back to center
 		//m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
 		m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 	}
@@ -224,6 +248,9 @@ public class RunnerCharacter : MonoBehaviour
 		}
 		else if (other.tag.Equals ("2DMode")) {
 			Start2DMode ();
+		}
+		else if (other.tag.Equals ("Rail")) {
+			ChangeRail ();
 		}
 	}
 }
