@@ -7,7 +7,7 @@ public class RunnerCharacter : MonoBehaviour
 {
     [SerializeField] private float m_MaxSpeed = 10f;                    // The fastest the player can travel in the x axis.
 	[SerializeField] private float m_JumpVelocity = 15f;                // Upward velocity when the player jumps.
-    [SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
+    //[SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
 
 	private bool m_Grounded;			// Whether or not the player is grounded.
     private Animator m_Anim;			// Reference to the player's animator component.
@@ -34,6 +34,10 @@ public class RunnerCharacter : MonoBehaviour
 
 	public Transform perfectPosition;
 
+	//coroutines
+	private IEnumerator camSidestep;
+	private IEnumerator cam2D;
+
     private void Awake()
     {
         // Setting up references.
@@ -49,6 +53,9 @@ public class RunnerCharacter : MonoBehaviour
 		m_Grounded = true;
 		m_Rigidbody.useGravity = false;
 		m_PersonalGravity = Vector3.down * m_GravityStrength;
+
+		camSidestep = CameraSidestepAngle ();
+		cam2D = Camera2DAngle ();
     }
 
 
@@ -101,10 +108,12 @@ public class RunnerCharacter : MonoBehaviour
 				if (left && !right && rail != 1) {
 					rail += 1;
 					canChangeRail = false;
+					m_Anim.SetBool ("LeftStep", true);
 				} 
 				else if (right && !left && rail != -1) {
 					rail -= 1;
 					canChangeRail = false;
+					m_Anim.SetBool ("RightStep", true);
 				}
 			}
 		}
@@ -134,7 +143,7 @@ public class RunnerCharacter : MonoBehaviour
 		m_Rigidbody.velocity = tempVel;
 	}
 
-	private void ChangeRail(){
+	private void RailAlign(){
 		Vector3 tempVel = m_Rigidbody.velocity;
 		tempVel.z = 0.0f;
 		m_Rigidbody.velocity = tempVel;
@@ -144,22 +153,28 @@ public class RunnerCharacter : MonoBehaviour
 		transform.position = tempPos;
 
 		canChangeRail = true;
+		StartCoroutine (StopStep (0.2f));
+	}
+	private IEnumerator StopStep(float timeSeconds){
+		yield return new WaitForSeconds (timeSeconds);
+		m_Anim.SetBool ("LeftStep", false);
+		m_Anim.SetBool ("RightStep", false);
 	}
 
 
 	private void StartSidestepMode(){
 		sidestepMode = true;
-		StopAllCoroutines ();
-		StartCoroutine (CameraSidestepAngle ());
+		StopCoroutine (cam2D);
+		StartCoroutine (camSidestep);
 		//m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 	}
 
 	private void Start2DMode(){
 		sidestepMode = false;
 		rail = 0;
-		ChangeRail ();	//sets character back to center
-		StopAllCoroutines ();
-		StartCoroutine (Camera2DAngle ());
+		RailAlign ();	//sets character back to center
+		StopCoroutine(camSidestep);
+		StartCoroutine (cam2D);
 		//m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
 		m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 	}
@@ -194,7 +209,7 @@ public class RunnerCharacter : MonoBehaviour
 		m_Rigidbody.velocity = Vector3.zero;
 		transform.position = lastCheckpoint;
 		rail = 0;
-		ChangeRail ();
+		RailAlign ();
 
 		Transform tempCam = GameObject.FindGameObjectWithTag ("CameraController").transform;
 
@@ -247,7 +262,7 @@ public class RunnerCharacter : MonoBehaviour
 			Start2DMode ();
 		}
 		else if (other.tag.Equals ("Rail") && sidestepMode) {
-			ChangeRail ();
+			RailAlign ();
 		}
 	}
 }
