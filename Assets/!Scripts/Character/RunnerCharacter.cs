@@ -21,7 +21,7 @@ public class RunnerCharacter : MonoBehaviour
 	private Vector3 lastCheckpoint;
 	private Transform m_CamOffset;
 
-	private bool groundedThisFrame = true;		//used for smoothing the animator
+	private bool groundedThisFrame = true;		//used for smoothing bumps in animator
 
 	[SerializeField] private float m_GravityStrength = 1500.0f;
 	private Vector3 m_PersonalGravity;
@@ -30,7 +30,7 @@ public class RunnerCharacter : MonoBehaviour
 	private int rail = 0;					// 1 is left, -1 is right
 	private const float k_RailWidth = 5.0f;
 
-	private bool canChangeRail = true;
+	private bool canChangeRail;
 
 	public Transform perfectPosition;
 
@@ -56,6 +56,8 @@ public class RunnerCharacter : MonoBehaviour
 
 		camSidestep = CameraSidestepAngle ();
 		cam2D = Camera2DAngle ();
+
+		canChangeRail = true;
     }
 
 	public bool GetSidestepMode(){
@@ -101,28 +103,31 @@ public class RunnerCharacter : MonoBehaviour
 		m_Anim.SetBool("JumpFire", false);
 
 		// processes input based on movement mode
-		float moveX, moveZ;
+		float moveX;
+		//float moveZ;
 		if (sidestepMode) {
 			moveX = vAxis;
-			moveZ = -hAxis;
+			//moveZ = -hAxis;
 
 			//rails
 			if (canChangeRail) {
 				if (left && !right && rail != 1) {
-					rail += 1;
+					print (canChangeRail);
 					canChangeRail = false;
+					rail += 1;
 					m_Anim.SetBool ("LeftStep", true);
 				} 
 				else if (right && !left && rail != -1) {
-					rail -= 1;
+					print (canChangeRail);
 					canChangeRail = false;
+					rail -= 1;
 					m_Anim.SetBool ("RightStep", true);
 				}
 			}
 		}
 		else {
 			moveX = hAxis;
-			moveZ = 0.0f;
+			//moveZ = 0.0f;
 		}
 			
 
@@ -145,7 +150,9 @@ public class RunnerCharacter : MonoBehaviour
 
 		m_Rigidbody.velocity = tempVel;
 	}
-
+	private int RandomRail(){
+		return UnityEngine.Random.Range (-1,2);
+	}
 	private void RailAlign(){
 		Vector3 tempVel = m_Rigidbody.velocity;
 		tempVel.z = 0.0f;
@@ -153,15 +160,27 @@ public class RunnerCharacter : MonoBehaviour
 
 		Vector3 tempPos = transform.position;
 		tempPos.z = rail * k_RailWidth;
+		//tempPos.z = RandomRail() * k_RailWidth;
 		transform.position = tempPos;
 
-		canChangeRail = true;
+		print ("aligned");
+		//canChangeRail = true;
 		StartCoroutine (StopStep (0.1f));
+		StartCoroutine (LateAllowRailChange ());
+
+		//print ("aligned");
 	}
 	private IEnumerator StopStep(float timeSeconds){
 		yield return new WaitForSeconds (timeSeconds);
 		m_Anim.SetBool ("LeftStep", false);
 		m_Anim.SetBool ("RightStep", false);
+	}
+	private IEnumerator LateAllowRailChange(){
+		//yield return new WaitForFixedUpdate ();
+		//yield return new WaitForEndOfFrame ();
+		//yield return new WaitForSeconds (0.1f);
+		yield return new WaitForSeconds (2f);
+		canChangeRail = true;
 	}
 
 
@@ -169,7 +188,6 @@ public class RunnerCharacter : MonoBehaviour
 		sidestepMode = true;
 		StopCoroutine (cam2D);
 		StartCoroutine (camSidestep);
-		//m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 	}
 
 	private void Start2DMode(){
@@ -178,8 +196,6 @@ public class RunnerCharacter : MonoBehaviour
 		RailAlign ();	//sets character back to center
 		StopCoroutine(camSidestep);
 		StartCoroutine (cam2D);
-		//m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
-		m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotation;
 	}
 
 	private IEnumerator CameraSidestepAngle(){
@@ -261,13 +277,10 @@ public class RunnerCharacter : MonoBehaviour
 		else if (other.tag.Equals ("SidestepMode")) {
 			StartSidestepMode ();
 		}
-		else if (other.tag.Equals ("SidestepMode")) {
-			StartSidestepMode ();
-		}
 		else if (other.tag.Equals ("2DMode")) {
 			Start2DMode ();
 		}
-		else if (other.tag.Equals ("Rail") && sidestepMode) {
+		else if (other.tag.Equals ("Rail") && sidestepMode && !canChangeRail) {
 			RailAlign ();
 		}
 	}

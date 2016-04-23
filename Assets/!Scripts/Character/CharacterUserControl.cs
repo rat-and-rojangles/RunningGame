@@ -40,10 +40,12 @@ public class CharacterUserControl : MonoBehaviour
 				m_Jump = CrossPlatformInputManager.GetButtonDown ("Jump");
 			}
 			if (!m_Left) {	
-				m_Left = CrossPlatformInputManager.GetButtonDown ("Left");
+				//m_Left = CrossPlatformInputManager.GetButtonDown ("Left");
+				m_Left = CrossPlatformInputManager.GetButton ("Left");
 			}
 			if (!m_Right) {	
-				m_Right = CrossPlatformInputManager.GetButtonDown ("Right");
+				//m_Right = CrossPlatformInputManager.GetButtonDown ("Right");
+				m_Right = CrossPlatformInputManager.GetButton ("Right");
 			}
 		}
 
