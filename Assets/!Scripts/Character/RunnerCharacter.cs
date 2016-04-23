@@ -58,6 +58,10 @@ public class RunnerCharacter : MonoBehaviour
 		cam2D = Camera2DAngle ();
     }
 
+	public bool GetSidestepMode(){
+		return sidestepMode;
+	}
+
 
     private void FixedUpdate()
     {
@@ -79,13 +83,12 @@ public class RunnerCharacter : MonoBehaviour
 				m_Rigidbody.AddForce (Vector3.right * (perfectPosition.position.x - transform.position.x) * 150);
 			}
 
+			//rail jumping
 			if (transform.position.z > rail * k_RailWidth) {
-				//m_Rigidbody.AddForce (Vector3.back * (transform.position.z - rail * k_RailWidth) * 150);
-				m_Rigidbody.AddForce (Vector3.back * (transform.position.z - rail * k_RailWidth) * 100);
+				m_Rigidbody.AddForce (Vector3.back * (transform.position.z - rail * k_RailWidth) * 150);
 			}
 			else if (transform.position.z < rail * k_RailWidth) {
-				//m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.b) * 150);
-				m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * 100);
+				m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * 150);
 			}
 		}
     }
@@ -153,7 +156,7 @@ public class RunnerCharacter : MonoBehaviour
 		transform.position = tempPos;
 
 		canChangeRail = true;
-		StartCoroutine (StopStep (0.2f));
+		StartCoroutine (StopStep (0.1f));
 	}
 	private IEnumerator StopStep(float timeSeconds){
 		yield return new WaitForSeconds (timeSeconds);
@@ -248,11 +251,14 @@ public class RunnerCharacter : MonoBehaviour
 	void OnTriggerEnter(Collider other){
 		if (other.tag.Equals ("Respawn")) {
 			lastCheckpoint = transform.position;
-		} else if (other.tag.Equals ("Deadly")) {
+		}
+		else if (other.tag.Equals ("Deadly")) {
 			Die ();
-		} else if (other.tag.Equals ("Collectible")) {
+		} 
+		else if (other.tag.Equals ("Collectible")) {
 			Destroy (other.gameObject);
-		} else if (other.tag.Equals ("SidestepMode")) {
+		} 
+		else if (other.tag.Equals ("SidestepMode")) {
 			StartSidestepMode ();
 		}
 		else if (other.tag.Equals ("SidestepMode")) {
