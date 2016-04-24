@@ -233,27 +233,29 @@ public class RunnerCharacter : MonoBehaviour
 
 	private IEnumerator RailForceLeft(){
 		int sign = Math.Sign (rail * k_RailWidth - transform.position.z);
-		while (shiftingBetweenRails) {
+		bool stillAdjusting = true;
+		while (stillAdjusting) {
 			m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * m_SidestepForce);
 			if (sign != Math.Sign (rail * k_RailWidth - transform.position.z)) {
-				shiftingBetweenRails = false;
+				stillAdjusting = false;
 			}
-
 			yield return new WaitForFixedUpdate ();
 		}
 		RailAlign ();
+		shiftingBetweenRails = false;
 	}
 	private IEnumerator RailForceRight(){
 		int sign = Math.Sign (rail * k_RailWidth - transform.position.z);
-		while (shiftingBetweenRails) {
+		bool stillAdjusting = true;
+		while (stillAdjusting) {
 			m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * m_SidestepForce);
 			if (sign != Math.Sign (rail * k_RailWidth - transform.position.z)) {
-				shiftingBetweenRails = false;
+				stillAdjusting = false;
 			}
-
 			yield return new WaitForFixedUpdate ();
 		}
 		RailAlign ();
+		shiftingBetweenRails = false;
 	}
 
 	public void Die(){
