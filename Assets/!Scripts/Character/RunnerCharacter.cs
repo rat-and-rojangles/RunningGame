@@ -15,7 +15,7 @@ public class RunnerCharacter : MonoBehaviour
 	private CapsuleCollider m_Capsule;
 
 	const int k_MaxJumps = 1;
-	private int m_RemainingJumps = 500;
+	private int m_RemainingJumps;
 
 	private AutoMoveLevel aml;
 	private Vector3 lastCheckpoint;
@@ -30,13 +30,18 @@ public class RunnerCharacter : MonoBehaviour
 	private int rail = 0;					// 1 is left, -1 is right
 	private const float k_RailWidth = 5.0f;
 
-	private bool canChangeRail;
+	private bool shiftingBetweenRails = false;
 
 	public Transform perfectPosition;
 
-	//coroutines
+	//coroutines that can be stopped
 	private IEnumerator camSidestep;
 	private IEnumerator cam2D;
+	private IEnumerator railForceLeft;
+	private IEnumerator railForceRight;
+	private IEnumerator stopStep;
+
+	private const float sidestepAnimationLength = 0.1f;
 
     private void Awake()
     {
@@ -54,10 +59,12 @@ public class RunnerCharacter : MonoBehaviour
 		m_Rigidbody.useGravity = false;
 		m_PersonalGravity = Vector3.down * m_GravityStrength;
 
+		//initializing these so they won't be null when stopped
 		camSidestep = CameraSidestepAngle ();
 		cam2D = Camera2DAngle ();
-
-		canChangeRail = true;
+		railForceLeft = RailForceLeft ();
+		railForceRight = RailForceRight ();
+		stopStep = StopStepAnimation (sidestepAnimationLength);
     }
 
 	public bool GetSidestepMode(){
@@ -77,20 +84,12 @@ public class RunnerCharacter : MonoBehaviour
 		m_Rigidbody.AddForce (m_PersonalGravity * Time.fixedDeltaTime);		//gravity
 
 		if (sidestepMode) {
-			//Forward backward stuff
+			//keeping perfect distance from camera
 			if (transform.position.x > perfectPosition.position.x) {
 				m_Rigidbody.AddForce (Vector3.left * (transform.position.x - perfectPosition.position.x) * 150);
 			}
 			else if (transform.position.x < perfectPosition.position.x) {
 				m_Rigidbody.AddForce (Vector3.right * (perfectPosition.position.x - transform.position.x) * 150);
-			}
-
-			//rail jumping
-			if (transform.position.z > rail * k_RailWidth) {
-				m_Rigidbody.AddForce (Vector3.back * (transform.position.z - rail * k_RailWidth) * 150);
-			}
-			else if (transform.position.z < rail * k_RailWidth) {
-				m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * 150);
 			}
 		}
     }
@@ -110,18 +109,28 @@ public class RunnerCharacter : MonoBehaviour
 			//moveZ = -hAxis;
 
 			//rails
-			if (canChangeRail) {
+			if (!shiftingBetweenRails) {
 				if (left && !right && rail != 1) {
-					print (canChangeRail);
-					canChangeRail = false;
 					rail += 1;
+
+					shiftingBetweenRails = true;
+
+					StopCoroutine (stopStep);	//stops the sidestep animation from cancelling on quickly successive steps
 					m_Anim.SetBool ("LeftStep", true);
+					m_Anim.SetBool ("RightStep", false);
+					railForceLeft = RailForceLeft ();
+					StartCoroutine (railForceLeft);
 				} 
 				else if (right && !left && rail != -1) {
-					print (canChangeRail);
-					canChangeRail = false;
 					rail -= 1;
+
+					shiftingBetweenRails = true;
+
+					StopCoroutine (stopStep);	//stops the sidestep animation from cancelling on quickly successive steps
 					m_Anim.SetBool ("RightStep", true);
+					m_Anim.SetBool ("LeftStep", false);
+					railForceRight = RailForceRight ();
+					StartCoroutine (railForceRight);
 				}
 			}
 		}
@@ -129,8 +138,6 @@ public class RunnerCharacter : MonoBehaviour
 			moveX = hAxis;
 			//moveZ = 0.0f;
 		}
-			
-
 
 		// Move the character
 		Vector3 tempVel = m_Rigidbody.velocity;
@@ -150,43 +157,33 @@ public class RunnerCharacter : MonoBehaviour
 
 		m_Rigidbody.velocity = tempVel;
 	}
-	private int RandomRail(){
-		return UnityEngine.Random.Range (-1,2);
-	}
+
+
 	private void RailAlign(){
+		shiftingBetweenRails = false;
+
 		Vector3 tempVel = m_Rigidbody.velocity;
 		tempVel.z = 0.0f;
 		m_Rigidbody.velocity = tempVel;
 
 		Vector3 tempPos = transform.position;
 		tempPos.z = rail * k_RailWidth;
-		//tempPos.z = RandomRail() * k_RailWidth;
 		transform.position = tempPos;
 
-		print ("aligned");
-		//canChangeRail = true;
-		StartCoroutine (StopStep (0.1f));
-		StartCoroutine (LateAllowRailChange ());
-
-		//print ("aligned");
+		stopStep = StopStepAnimation (sidestepAnimationLength);
+		StartCoroutine (stopStep);
 	}
-	private IEnumerator StopStep(float timeSeconds){
+	private IEnumerator StopStepAnimation(float timeSeconds){
 		yield return new WaitForSeconds (timeSeconds);
 		m_Anim.SetBool ("LeftStep", false);
 		m_Anim.SetBool ("RightStep", false);
-	}
-	private IEnumerator LateAllowRailChange(){
-		//yield return new WaitForFixedUpdate ();
-		//yield return new WaitForEndOfFrame ();
-		//yield return new WaitForSeconds (0.1f);
-		yield return new WaitForSeconds (2f);
-		canChangeRail = true;
 	}
 
 
 	private void StartSidestepMode(){
 		sidestepMode = true;
 		StopCoroutine (cam2D);
+		camSidestep = CameraSidestepAngle ();
 		StartCoroutine (camSidestep);
 	}
 
@@ -194,8 +191,18 @@ public class RunnerCharacter : MonoBehaviour
 		sidestepMode = false;
 		rail = 0;
 		RailAlign ();	//sets character back to center
-		StopCoroutine(camSidestep);
+		StopCoroutine (camSidestep);
+		cam2D = Camera2DAngle ();
 		StartCoroutine (cam2D);
+	}
+
+	public void ToggleMovementMode(){
+		if (sidestepMode) {
+			Start2DMode ();
+		}
+		else {
+			StartSidestepMode ();
+		}
 	}
 
 	private IEnumerator CameraSidestepAngle(){
@@ -221,6 +228,31 @@ public class RunnerCharacter : MonoBehaviour
 			rate++;
 			yield return null;
 		}
+	}
+
+	private IEnumerator RailForceLeft(){
+		int sign = Math.Sign (rail * k_RailWidth - transform.position.z);
+		while (shiftingBetweenRails) {
+			m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * 150);
+			if (sign != Math.Sign (rail * k_RailWidth - transform.position.z)) {
+				shiftingBetweenRails = false;
+			}
+
+			yield return new WaitForFixedUpdate ();
+		}
+		RailAlign ();
+	}
+	private IEnumerator RailForceRight(){
+		int sign = Math.Sign (rail * k_RailWidth - transform.position.z);
+		while (shiftingBetweenRails) {
+			m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * 150);
+			if (sign != Math.Sign (rail * k_RailWidth - transform.position.z)) {
+				shiftingBetweenRails = false;
+			}
+
+			yield return new WaitForFixedUpdate ();
+		}
+		RailAlign ();
 	}
 
 	public void Die(){
@@ -280,8 +312,9 @@ public class RunnerCharacter : MonoBehaviour
 		else if (other.tag.Equals ("2DMode")) {
 			Start2DMode ();
 		}
-		else if (other.tag.Equals ("Rail") && sidestepMode && !canChangeRail) {
+		//else if (other.tag.Equals ("Rail") && sidestepMode && !canChangeRail) {
+		/*else if (other.tag.Equals ("Rail") && sidestepMode) {
 			RailAlign ();
-		}
+		}*/
 	}
 }
