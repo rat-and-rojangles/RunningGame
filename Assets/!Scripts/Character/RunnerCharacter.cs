@@ -29,6 +29,7 @@ public class RunnerCharacter : MonoBehaviour
 	private bool sidestepMode = false;
 	private int rail = 0;					// 1 is left, -1 is right
 	private const float k_RailWidth = 5.0f;
+	[SerializeField] private float m_SidestepForce = 150.0f;
 
 	private bool shiftingBetweenRails = false;
 
@@ -189,8 +190,8 @@ public class RunnerCharacter : MonoBehaviour
 
 	private void Start2DMode(){
 		sidestepMode = false;
-		rail = 0;
-		RailAlign ();	//sets character back to center
+		//rail = 0;
+		//RailAlign ();	//sets character back to center
 		StopCoroutine (camSidestep);
 		cam2D = Camera2DAngle ();
 		StartCoroutine (cam2D);
@@ -233,7 +234,7 @@ public class RunnerCharacter : MonoBehaviour
 	private IEnumerator RailForceLeft(){
 		int sign = Math.Sign (rail * k_RailWidth - transform.position.z);
 		while (shiftingBetweenRails) {
-			m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * 150);
+			m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * m_SidestepForce);
 			if (sign != Math.Sign (rail * k_RailWidth - transform.position.z)) {
 				shiftingBetweenRails = false;
 			}
@@ -245,7 +246,7 @@ public class RunnerCharacter : MonoBehaviour
 	private IEnumerator RailForceRight(){
 		int sign = Math.Sign (rail * k_RailWidth - transform.position.z);
 		while (shiftingBetweenRails) {
-			m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * 150);
+			m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * m_SidestepForce);
 			if (sign != Math.Sign (rail * k_RailWidth - transform.position.z)) {
 				shiftingBetweenRails = false;
 			}
