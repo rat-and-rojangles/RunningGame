@@ -104,10 +104,8 @@ public class RunnerCharacter : MonoBehaviour
 
 		// processes input based on movement mode
 		float moveX;
-		//float moveZ;
 		if (sidestepMode) {
-			moveX = vAxis;
-			//moveZ = -hAxis;
+			moveX = 0.0f;
 
 			//rails
 			if (!shiftingBetweenRails) {
@@ -137,13 +135,11 @@ public class RunnerCharacter : MonoBehaviour
 		}
 		else {
 			moveX = hAxis;
-			//moveZ = 0.0f;
 		}
 
 		// Move the character
 		Vector3 tempVel = m_Rigidbody.velocity;
 		tempVel.x = moveX * m_MaxSpeed + aml.speed;
-		//tempVel.z = moveZ * m_MaxSpeed;
 
 		// If the player should jump...
 		if (m_RemainingJumps > 0 && jump) {
@@ -157,6 +153,10 @@ public class RunnerCharacter : MonoBehaviour
 		} 
 
 		m_Rigidbody.velocity = tempVel;
+
+		if (vAxis >= 0.9f) {
+			m_Anim.SetBool ("LyingDown", true);
+		}
 	}
 
 
