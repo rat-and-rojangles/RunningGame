@@ -154,9 +154,12 @@ public class RunnerCharacter : MonoBehaviour
 
 		m_Rigidbody.velocity = tempVel;
 
-		if (vAxis >= 0.9f) {
+		/*if (vAxis >= 0.9f) {
 			m_Anim.SetBool ("LyingDown", true);
 		}
+		else if (vAxis <= -0.9f) {
+			m_Anim.SetBool ("LyingDown", true);
+		}*/
 	}
 
 
@@ -209,24 +212,24 @@ public class RunnerCharacter : MonoBehaviour
 	private IEnumerator CameraSidestepAngle(){
 		Quaternion tempQ = m_CamOffset.rotation;
 		Vector3 tempRot = m_CamOffset.rotation.eulerAngles;
-		int rate = 10;
+		float rate = 10.0f;
 		while (m_CamOffset.rotation.eulerAngles.y < 90){
 			tempRot.y = Mathf.Lerp (m_CamOffset.rotation.eulerAngles.y, 90, Time.deltaTime * rate);
 			tempQ.eulerAngles = tempRot;
 			m_CamOffset.rotation = tempQ;
-			rate++;
+			rate += Time.deltaTime;
 			yield return null;
 		}
 	}
 	private IEnumerator Camera2DAngle(){
 		Quaternion tempQ = m_CamOffset.rotation;
 		Vector3 tempRot = m_CamOffset.rotation.eulerAngles;
-		int rate = 10;
+		float rate = 10.0f;
 		while (m_CamOffset.rotation.eulerAngles.y > 0){
 			tempRot.y = Mathf.Lerp (m_CamOffset.rotation.eulerAngles.y, 0, Time.deltaTime * rate);
 			tempQ.eulerAngles = tempRot;
 			m_CamOffset.rotation = tempQ;
-			rate++;
+			rate += Time.deltaTime;
 			yield return null;
 		}
 	}
