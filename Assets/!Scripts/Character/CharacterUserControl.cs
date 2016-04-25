@@ -64,6 +64,7 @@ public class CharacterUserControl : MonoBehaviour
 
     private void FixedUpdate()
     {
+
         // Read the horizontal input.
         float h = CrossPlatformInputManager.GetAxis("Horizontal");
 		float v = CrossPlatformInputManager.GetAxis("Vertical");
