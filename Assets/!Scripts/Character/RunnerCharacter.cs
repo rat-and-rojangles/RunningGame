@@ -169,6 +169,7 @@ public class RunnerCharacter : MonoBehaviour
 		if (down && !m_SidestepMode && !m_Grounded && !m_FastFalling) {
 			m_Anim.SetBool ("FastFall", true);
 			m_FastFalling = true;
+			m_RemainingJumps = 0;
 
 			//SLAM!
 			tempVel.y = -k_FastFallSpeed;
