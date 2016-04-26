@@ -30,12 +30,13 @@ public class RunnerCharacter : MonoBehaviour
 
 	private bool m_SidestepMode = false;
 	private int rail = 0;					// 1 is left, -1 is right
+	private int prevRail = 0;				// 1 is left, -1 is right
 	private const float k_RailWidth = 5.0f;
 	[SerializeField] private float m_SidestepForce = 150.0f;
 	private bool shiftingBetweenRails = false;
 	private Transform leftCheck;
 	private Transform rightCheck;
-	private const float k_SidestepCheckRadius = 1.0f;
+	private int m_RailForceSign;
 
 	private bool m_FastFalling = false;
 	private const float k_FastFallSpeed = 60.0f;
@@ -46,8 +47,7 @@ public class RunnerCharacter : MonoBehaviour
 	//coroutines that can be stopped
 	private IEnumerator camSidestep;
 	private IEnumerator cam2D;
-	private IEnumerator railForceLeft;
-	private IEnumerator railForceRight;
+	private IEnumerator railForce;
 	private IEnumerator stopStep;
 
 	private const float k_SidestepAnimationLength = 0.1f;
@@ -64,8 +64,8 @@ public class RunnerCharacter : MonoBehaviour
 
 		sidestepPositionFromCamera = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("SidestepPosition").transform;
 
-		leftCheck = transform.Find ("LeftCheck").transform;
-		rightCheck = transform.Find ("RightCheck").transform;
+		//leftCheck = transform.Find ("LeftCheck").transform;
+		//rightCheck = transform.Find ("RightCheck").transform;
 
 		lastCheckpoint = transform.position;	//first checkpoint is start
 
@@ -78,8 +78,7 @@ public class RunnerCharacter : MonoBehaviour
 		//initializing these so they won't be null when stopped
 		camSidestep = CameraSidestepAngle ();
 		cam2D = Camera2DAngle ();
-		railForceLeft = RailForceLeft ();
-		railForceRight = RailForceRight ();
+		railForce = RailForce ();
 		stopStep = StopStepAnimation (k_SidestepAnimationLength);
     }
 
@@ -134,6 +133,7 @@ public class RunnerCharacter : MonoBehaviour
 			//rails
 			if (!shiftingBetweenRails) {
 				if (left && !right && rail != 1 && LeftAvailable ()) {
+					prevRail = rail;
 					rail += 1;
 
 					shiftingBetweenRails = true;
@@ -141,10 +141,11 @@ public class RunnerCharacter : MonoBehaviour
 					StopCoroutine (stopStep);	//stops the sidestep animation from cancelling on quickly successive steps
 					m_Anim.SetBool ("LeftStep", true);
 					m_Anim.SetBool ("RightStep", false);
-					railForceLeft = RailForceLeft ();
-					StartCoroutine (railForceLeft);
+					railForce = RailForce ();
+					StartCoroutine (railForce);
 				} 
 				else if (right && !left && rail != -1 && RightAvailable ()) {
+					prevRail = rail;
 					rail -= 1;
 
 					shiftingBetweenRails = true;
@@ -152,8 +153,8 @@ public class RunnerCharacter : MonoBehaviour
 					StopCoroutine (stopStep);	//stops the sidestep animation from cancelling on quickly successive steps
 					m_Anim.SetBool ("RightStep", true);
 					m_Anim.SetBool ("LeftStep", false);
-					railForceRight = RailForceRight ();
-					StartCoroutine (railForceRight);
+					railForce = RailForce ();
+					StartCoroutine (railForce);
 				}
 			}
 		}
@@ -191,10 +192,12 @@ public class RunnerCharacter : MonoBehaviour
 	}
 
 	private bool LeftAvailable(){
-		return !Physics.CheckSphere (leftCheck.position, k_SidestepCheckRadius);
+		//return !Physics.CheckSphere (leftCheck.position, k_SidestepCheckRadius);
+		return true;
 	}
 	private bool RightAvailable(){
-		return !Physics.CheckSphere (rightCheck.position, k_SidestepCheckRadius);
+		//return !Physics.CheckSphere (rightCheck.position, k_SidestepCheckRadius);
+		return true;
 	}
 
 	private void RailAlign(){
@@ -267,25 +270,12 @@ public class RunnerCharacter : MonoBehaviour
 		}
 	}
 
-	private IEnumerator RailForceLeft(){
-		int sign = Math.Sign (rail * k_RailWidth - transform.position.z);
+	private IEnumerator RailForce(){
+		m_RailForceSign = Math.Sign (rail * k_RailWidth - transform.position.z);
 		bool stillAdjusting = true;
 		while (stillAdjusting) {
 			m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * m_SidestepForce);
-			if (sign != Math.Sign (rail * k_RailWidth - transform.position.z)) {
-				stillAdjusting = false;
-			}
-			yield return new WaitForFixedUpdate ();
-		}
-		RailAlign ();
-		shiftingBetweenRails = false;
-	}
-	private IEnumerator RailForceRight(){
-		int sign = Math.Sign (rail * k_RailWidth - transform.position.z);
-		bool stillAdjusting = true;
-		while (stillAdjusting) {
-			m_Rigidbody.AddForce (Vector3.forward * (rail * k_RailWidth - transform.position.z) * m_SidestepForce);
-			if (sign != Math.Sign (rail * k_RailWidth - transform.position.z)) {
+			if (m_RailForceSign != Math.Sign (rail * k_RailWidth - transform.position.z)) {
 				stillAdjusting = false;
 			}
 			yield return new WaitForFixedUpdate ();
@@ -309,9 +299,9 @@ public class RunnerCharacter : MonoBehaviour
 	}
 
 	void OnCollisionEnter(Collision c){
-		Vector2 center = m_Capsule.bounds.center;
+		Vector3 center = m_Capsule.bounds.center;
 		foreach (ContactPoint p in c.contacts) {			//detects ground
-			Vector2 flex = (Vector2) p.point - (Vector2) center;
+			Vector3 flex = p.point - center;
 			float angle = Mathf.Atan2 (flex.y, flex.x) * Mathf.Rad2Deg;
 			//if (angle < -40 && angle > -140){
 			if (angle < -k_MaxGroundCollisionAngle && angle > k_MaxGroundCollisionAngle-180){
@@ -321,9 +311,9 @@ public class RunnerCharacter : MonoBehaviour
 		}
 	}
 	void OnCollisionStay(Collision c){
-		Vector2 center = m_Capsule.bounds.center;
+		Vector3 center = m_Capsule.bounds.center;
 		foreach (ContactPoint p in c.contacts) {			//detects ground
-			Vector2 flex = (Vector2) p.point - (Vector2) center;
+			Vector3 flex = p.point - center;
 			float angle = Mathf.Atan2 (flex.y, flex.x) * Mathf.Rad2Deg;
 			//if (angle < -40 && angle > -140){
 			if (angle < -k_MaxGroundCollisionAngle && angle > k_MaxGroundCollisionAngle-180){
@@ -347,5 +337,16 @@ public class RunnerCharacter : MonoBehaviour
 		else if (other.tag.Equals ("Collectible")) {
 			Destroy (other.gameObject);
 		} 
+	}
+
+	public void SideTriggerCollide(int direction){
+		if (shiftingBetweenRails) {
+			if (prevRail + direction == rail) {		//if moving in the right direction
+				int temp = rail;
+				rail = prevRail;
+				prevRail = temp;
+				m_RailForceSign = m_RailForceSign * -1;
+			}
+		}
 	}
 }

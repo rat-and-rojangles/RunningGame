@@ -23,7 +23,7 @@ public class CamShaker : MonoBehaviour {
 
 		while (elapsed < duration) {
 
-			elapsed += Time.deltaTime;          
+			elapsed += Time.unscaledDeltaTime;          
 
 			float percentComplete = elapsed / duration;         
 			float damper = 1.0f - Mathf.Clamp(4.0f * percentComplete - 3.0f, 0.0f, 1.0f);
@@ -37,7 +37,7 @@ public class CamShaker : MonoBehaviour {
 			xTotal += x;
 
 			//Camera.main.transform.position = new Vector3(x, y, originalCamPos.z);
-			m_CamOffset.position += ((Vector3.right * x) + (Vector3.up * y)) * Time.deltaTime * k_TimeCompensation;
+			m_CamOffset.position += ((Vector3.right * x) + (Vector3.up * y)) * Time.unscaledDeltaTime * k_TimeCompensation;
 
 			yield return null;
 		}

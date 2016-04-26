@@ -15,7 +15,9 @@ public class LooseCameraFollowVertical : MonoBehaviour {
 	void LateUpdate () {
 		float distance = Mathf.Abs(transform.position.y - m_Target.position.y);
 
-		Vector3 lerped = Vector3.Lerp (transform.position, m_Target.position, distance / m_Radius * m_Speed * Time.unscaledDeltaTime);
+		//Vector3 lerped = Vector3.Lerp (transform.position, m_Target.position, distance / m_Radius * m_Speed * Time.unscaledDeltaTime);
+		float factor = Mathf.Clamp01(distance / m_Radius * m_Speed * Time.unscaledDeltaTime) -0.01f;
+		Vector3 lerped = Vector3.Lerp (transform.position, m_Target.position, factor);
 		Vector3 newPos = new Vector3 (transform.position.x, lerped.y, transform.position.z);
 
 		transform.position = newPos;
