@@ -10,6 +10,7 @@ public class CharacterUserControl : MonoBehaviour
     private bool m_Jump;
 	private bool m_Left;
 	private bool m_Right;
+	private bool m_Down;
 	private bool m_Switch;
 
 	private PauseControl pauseControl;
@@ -40,6 +41,10 @@ public class CharacterUserControl : MonoBehaviour
 				m_Right = CrossPlatformInputManager.GetButtonDown ("Right");
 				//m_Right = CrossPlatformInputManager.GetButton ("Right");
 			}
+			if (!m_Down) {	
+				m_Down = CrossPlatformInputManager.GetButtonDown ("Down");
+				//m_Right = CrossPlatformInputManager.GetButton ("Right");
+			}
 			if (!m_Switch) {	
 				m_Switch = CrossPlatformInputManager.GetButtonDown ("Switch");
 			}
@@ -62,7 +67,7 @@ public class CharacterUserControl : MonoBehaviour
 		float v = CrossPlatformInputManager.GetAxis("Vertical");
 
         // Pass all parameters to the character control script.
-		m_Character.Move(h, v, m_Jump, m_Left, m_Right);
+		m_Character.Move(h, v, m_Jump, m_Left, m_Right, m_Down);
 		if (m_Switch) {
 			m_Character.ToggleMovementMode ();
 		}
@@ -70,6 +75,7 @@ public class CharacterUserControl : MonoBehaviour
         m_Jump = false;
 		m_Left = false;
 		m_Right = false;
+		m_Down = false;
 		m_Switch = false;
     }
 }

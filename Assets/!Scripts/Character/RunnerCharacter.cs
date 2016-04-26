@@ -28,12 +28,15 @@ public class RunnerCharacter : MonoBehaviour
 	[SerializeField] private float m_GravityStrength = 1500.0f;
 	private Vector3 m_PersonalGravity;
 
-	private bool sidestepMode = false;
+	private bool m_SidestepMode = false;
 	private int rail = 0;					// 1 is left, -1 is right
 	private const float k_RailWidth = 5.0f;
 	[SerializeField] private float m_SidestepForce = 150.0f;
 
 	private bool shiftingBetweenRails = false;
+
+	private bool m_FastFalling = false;
+	private const float k_FastFallSpeed = 60.0f;
 
 	private Transform sidestepPositionFromCamera;
 
@@ -44,7 +47,7 @@ public class RunnerCharacter : MonoBehaviour
 	private IEnumerator railForceRight;
 	private IEnumerator stopStep;
 
-	private const float sidestepAnimationLength = 0.1f;
+	private const float k_SidestepAnimationLength = 0.1f;
 
     private void Awake()
     {
@@ -69,27 +72,29 @@ public class RunnerCharacter : MonoBehaviour
 		cam2D = Camera2DAngle ();
 		railForceLeft = RailForceLeft ();
 		railForceRight = RailForceRight ();
-		stopStep = StopStepAnimation (sidestepAnimationLength);
+		stopStep = StopStepAnimation (k_SidestepAnimationLength);
     }
 
 	public bool GetSidestepMode(){
-		return sidestepMode;
+		return m_SidestepMode;
 	}
 
 
     private void FixedUpdate()
     {
-		/*if (Input.GetKey (KeyCode.Backspace)) {								//floating cheat
+		//floating cheat
+		/*if (Input.GetKey (KeyCode.Backspace)) {
 			m_Rigidbody.AddForce (-2 * m_PersonalGravity * Time.fixedDeltaTime);	
 		}*/
 
         // Set the vertical animation
         m_Anim.SetFloat("vSpeed", m_Rigidbody.velocity.y);
 
-		m_Rigidbody.AddForce (m_PersonalGravity * Time.fixedDeltaTime);		//gravity
+		//gravity
+		m_Rigidbody.AddForce (m_PersonalGravity * Time.fixedDeltaTime);
 
-		if (sidestepMode) {
-			//keeping perfect distance from camera
+		//keeping perfect distance from camera
+		if (m_SidestepMode) {
 			if (transform.position.x > sidestepPositionFromCamera.position.x) {
 				m_Rigidbody.AddForce (Vector3.left * (transform.position.x - sidestepPositionFromCamera.position.x) * 150);
 			}
@@ -97,18 +102,28 @@ public class RunnerCharacter : MonoBehaviour
 				m_Rigidbody.AddForce (Vector3.right * (sidestepPositionFromCamera.position.x - transform.position.x) * 150);
 			}
 		}
+
+		if (m_FastFalling) {
+			FastFall ();
+		}
+
     }
 		
 
-	public void Move(float hAxis, float vAxis, bool jump, bool left, bool right) {
+	public void Move(float hAxis, float vAxis, bool jump, bool left, bool right, bool down) {
 		m_Anim.SetBool ("Ground", m_Grounded || groundedThisFrame);		//for smoothing
 		groundedThisFrame = m_Grounded;
+
+		if (m_Grounded) {
+			m_FastFalling = false;
+			m_Anim.SetBool ("FastFall", false);
+		}
 
 		m_Anim.SetBool("JumpFire", false);
 
 		// processes input based on movement mode
 		float moveX;
-		if (sidestepMode) {
+		if (m_SidestepMode) {
 			moveX = 0.0f;
 
 			//rails
@@ -145,6 +160,12 @@ public class RunnerCharacter : MonoBehaviour
 		Vector3 tempVel = m_Rigidbody.velocity;
 		tempVel.x = moveX * m_MaxSpeed + aml.speed;
 
+		//fastfall
+		if (down && !m_SidestepMode && !m_Grounded) {
+			m_Anim.SetBool ("FastFall", true);
+			m_FastFalling = true;
+		}
+
 		// If the player should jump...
 		if (m_RemainingJumps > 0 && jump) {
 			tempVel.y = m_JumpVelocity;
@@ -154,18 +175,23 @@ public class RunnerCharacter : MonoBehaviour
 			groundedThisFrame = false;
 			m_Anim.SetBool ("JumpFire", true);
 			m_Anim.SetBool ("Ground", false);
-		} 
+		}
 
 		m_Rigidbody.velocity = tempVel;
 
-		if (vAxis >= 0.9f) {
+		/*if (vAxis >= 0.9f) {
 			m_Anim.SetBool ("LyingDown", false);
 		}
 		else if (vAxis <= -0.9f) {
 			m_Anim.SetBool ("LyingDown", true);
-		}
+		}*/
 	}
 
+	private void FastFall(){
+		Vector3 tempVel = m_Rigidbody.velocity;
+		tempVel.y = -k_FastFallSpeed;
+		m_Rigidbody.velocity = tempVel;
+	}
 
 	private void RailAlign(){
 		shiftingBetweenRails = false;
@@ -178,7 +204,7 @@ public class RunnerCharacter : MonoBehaviour
 		tempPos.z = rail * k_RailWidth;
 		transform.position = tempPos;
 
-		stopStep = StopStepAnimation (sidestepAnimationLength);
+		stopStep = StopStepAnimation (k_SidestepAnimationLength);
 		StartCoroutine (stopStep);
 	}
 	private IEnumerator StopStepAnimation(float timeSeconds){
@@ -189,14 +215,14 @@ public class RunnerCharacter : MonoBehaviour
 
 
 	private void StartSidestepMode(){
-		sidestepMode = true;
+		m_SidestepMode = true;
 		StopCoroutine (cam2D);
 		camSidestep = CameraSidestepAngle ();
 		StartCoroutine (camSidestep);
 	}
 
 	private void Start2DMode(){
-		sidestepMode = false;
+		m_SidestepMode = false;
 		//rail = 0;
 		//RailAlign ();	//sets character back to center
 		StopCoroutine (camSidestep);
@@ -205,7 +231,7 @@ public class RunnerCharacter : MonoBehaviour
 	}
 
 	public void ToggleMovementMode(){
-		if (sidestepMode) {
+		if (m_SidestepMode) {
 			Start2DMode ();
 		}
 		else {
