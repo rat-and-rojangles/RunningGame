@@ -41,6 +41,8 @@ public class PauseControl : MonoBehaviour {
 		StartCoroutine (fadeOut ());
 	}
 	public void Unpause(){
+		SetCameraEuler (camLastEuler);
+
 		paused = false;
 		Time.timeScale = 1.0f;
 		StopAllCoroutines ();
@@ -64,16 +66,18 @@ public class PauseControl : MonoBehaviour {
 	}
 
 	void Update(){
-		/*if (paused) {	//krazykam dummied out
-			Quaternion tempQ = camTrans.rotation;
-
-			Vector3 tempEuler = tempQ.eulerAngles;
+		if (paused) {	//krazykam
+			Vector3 tempEuler = camTrans.rotation.eulerAngles;
 			tempEuler += Vector3.up * CrossPlatformInputManager.GetAxisRaw("Horizontal") * Time.unscaledDeltaTime * 100;
 			tempEuler += Vector3.right * CrossPlatformInputManager.GetAxisRaw("Vertical") * Time.unscaledDeltaTime * 100;
-			tempQ.eulerAngles = tempEuler;
+			SetCameraEuler (tempEuler);
+			//camTrans.Rotate (new Vector3 (CrossPlatformInputManager.GetAxisRaw ("Vertical") * Time.unscaledDeltaTime * 100, CrossPlatformInputManager.GetAxisRaw ("Horizontal") * Time.unscaledDeltaTime * 100));
+		}
+	}
 
-			tempQ.eulerAngles = tempEuler;
-			camTrans.rotation = tempQ;
-		}*/
+	private void SetCameraEuler(Vector3 euler){
+		Quaternion tempQ = camTrans.rotation;
+		tempQ.eulerAngles = euler;
+		camTrans.rotation = tempQ;
 	}
 }

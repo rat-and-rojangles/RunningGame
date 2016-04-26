@@ -21,7 +21,7 @@ public class RunnerCharacter : MonoBehaviour
 	private Vector3 lastCheckpoint;
 	private Transform m_CamOffset;
 
-	private bool groundedThisFrame = true;		//used for smoothing bumps in animator
+	private bool groundedLastFrame = true;		//used for smoothing bumps in animator
 
 	private float k_MaxGroundCollisionAngle = 20.0f;
 
@@ -83,9 +83,9 @@ public class RunnerCharacter : MonoBehaviour
     private void FixedUpdate()
     {
 		//floating cheat
-		/*if (Input.GetKey (KeyCode.Backspace)) {
+		if (Input.GetKey (KeyCode.Backspace)) {
 			m_Rigidbody.AddForce (-2 * m_PersonalGravity * Time.fixedDeltaTime);	
-		}*/
+		}
 
         // Set the vertical animation
         m_Anim.SetFloat("vSpeed", m_Rigidbody.velocity.y);
@@ -102,22 +102,18 @@ public class RunnerCharacter : MonoBehaviour
 				m_Rigidbody.AddForce (Vector3.right * (sidestepPositionFromCamera.position.x - transform.position.x) * 150);
 			}
 		}
-
-		if (m_FastFalling) {
-			FastFall ();
-		}
-
     }
-		
 
 	public void Move(float hAxis, float vAxis, bool jump, bool left, bool right, bool down) {
-		m_Anim.SetBool ("Ground", m_Grounded || groundedThisFrame);		//for smoothing
-		groundedThisFrame = m_Grounded;
+		m_Anim.SetBool ("Ground", m_Grounded || groundedLastFrame);		//for smoothing
+		groundedLastFrame = m_Grounded;
 
-		if (m_Grounded) {
+		if (m_Grounded && m_FastFalling) {
 			m_FastFalling = false;
 			m_Anim.SetBool ("FastFall", false);
 		}
+
+		m_Anim.SetFloat("hAxis", Mathf.Abs(hAxis));
 
 		m_Anim.SetBool("JumpFire", false);
 
@@ -160,10 +156,14 @@ public class RunnerCharacter : MonoBehaviour
 		Vector3 tempVel = m_Rigidbody.velocity;
 		tempVel.x = moveX * m_MaxSpeed + aml.speed;
 
-		//fastfall
-		if (down && !m_SidestepMode && !m_Grounded) {
+		//initiate fastfall
+		if (down && !m_SidestepMode && !m_Grounded && !m_FastFalling) {
 			m_Anim.SetBool ("FastFall", true);
 			m_FastFalling = true;
+
+			//SLAM!
+			tempVel.y = -k_FastFallSpeed;
+			m_Rigidbody.velocity = tempVel;
 		}
 
 		// If the player should jump...
@@ -172,24 +172,11 @@ public class RunnerCharacter : MonoBehaviour
 			m_RemainingJumps--;
 
 			m_Grounded = false;
-			groundedThisFrame = false;
+			groundedLastFrame = false;
 			m_Anim.SetBool ("JumpFire", true);
 			m_Anim.SetBool ("Ground", false);
 		}
 
-		m_Rigidbody.velocity = tempVel;
-
-		/*if (vAxis >= 0.9f) {
-			m_Anim.SetBool ("LyingDown", false);
-		}
-		else if (vAxis <= -0.9f) {
-			m_Anim.SetBool ("LyingDown", true);
-		}*/
-	}
-
-	private void FastFall(){
-		Vector3 tempVel = m_Rigidbody.velocity;
-		tempVel.y = -k_FastFallSpeed;
 		m_Rigidbody.velocity = tempVel;
 	}
 
@@ -212,7 +199,6 @@ public class RunnerCharacter : MonoBehaviour
 		m_Anim.SetBool ("LeftStep", false);
 		m_Anim.SetBool ("RightStep", false);
 	}
-
 
 	private void StartSidestepMode(){
 		m_SidestepMode = true;
