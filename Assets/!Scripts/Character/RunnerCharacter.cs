@@ -39,6 +39,7 @@ public class RunnerCharacter : MonoBehaviour
 
 	private bool m_FastFalling = false;
 	private const float k_FastFallSpeed = 60.0f;
+	private CamShaker m_CamShaker;
 
 	private Transform sidestepPositionFromCamera;
 
@@ -67,6 +68,8 @@ public class RunnerCharacter : MonoBehaviour
 		rightCheck = transform.Find ("RightCheck").transform;
 
 		lastCheckpoint = transform.position;	//first checkpoint is start
+
+		m_CamShaker = GetComponent<CamShaker> ();
 
 		m_Grounded = true;
 		m_Rigidbody.useGravity = false;
@@ -116,6 +119,7 @@ public class RunnerCharacter : MonoBehaviour
 		if (m_Grounded && m_FastFalling) {
 			m_FastFalling = false;
 			m_Anim.SetBool ("FastFall", false);
+			m_CamShaker.Shake ();
 		}
 
 		m_Anim.SetFloat("hAxis", Mathf.Abs(hAxis));
