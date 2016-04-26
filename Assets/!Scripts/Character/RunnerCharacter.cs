@@ -23,6 +23,8 @@ public class RunnerCharacter : MonoBehaviour
 
 	private bool groundedThisFrame = true;		//used for smoothing bumps in animator
 
+	private float k_MaxGroundCollisionAngle = 20.0f;
+
 	[SerializeField] private float m_GravityStrength = 1500.0f;
 	private Vector3 m_PersonalGravity;
 
@@ -33,7 +35,7 @@ public class RunnerCharacter : MonoBehaviour
 
 	private bool shiftingBetweenRails = false;
 
-	public Transform perfectPosition;
+	private Transform sidestepPositionFromCamera;
 
 	//coroutines that can be stopped
 	private IEnumerator camSidestep;
@@ -52,7 +54,9 @@ public class RunnerCharacter : MonoBehaviour
 		m_Capsule = GetComponent<CapsuleCollider>();
 
 		aml = GameObject.FindGameObjectWithTag ("GameController").GetComponent<AutoMoveLevel> ();
-		m_CamOffset = GameObject.FindGameObjectWithTag ("CamOffset").transform;
+		m_CamOffset = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("CamOffset").transform;
+
+		sidestepPositionFromCamera = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("SidestepPosition").transform;
 
 		lastCheckpoint = transform.position;	//first checkpoint is start
 
@@ -86,11 +90,11 @@ public class RunnerCharacter : MonoBehaviour
 
 		if (sidestepMode) {
 			//keeping perfect distance from camera
-			if (transform.position.x > perfectPosition.position.x) {
-				m_Rigidbody.AddForce (Vector3.left * (transform.position.x - perfectPosition.position.x) * 150);
+			if (transform.position.x > sidestepPositionFromCamera.position.x) {
+				m_Rigidbody.AddForce (Vector3.left * (transform.position.x - sidestepPositionFromCamera.position.x) * 150);
 			}
-			else if (transform.position.x < perfectPosition.position.x) {
-				m_Rigidbody.AddForce (Vector3.right * (perfectPosition.position.x - transform.position.x) * 150);
+			else if (transform.position.x < sidestepPositionFromCamera.position.x) {
+				m_Rigidbody.AddForce (Vector3.right * (sidestepPositionFromCamera.position.x - transform.position.x) * 150);
 			}
 		}
     }
@@ -154,12 +158,12 @@ public class RunnerCharacter : MonoBehaviour
 
 		m_Rigidbody.velocity = tempVel;
 
-		/*if (vAxis >= 0.9f) {
-			m_Anim.SetBool ("LyingDown", true);
+		if (vAxis >= 0.9f) {
+			m_Anim.SetBool ("LyingDown", false);
 		}
 		else if (vAxis <= -0.9f) {
 			m_Anim.SetBool ("LyingDown", true);
-		}*/
+		}
 	}
 
 
@@ -280,7 +284,8 @@ public class RunnerCharacter : MonoBehaviour
 		foreach (ContactPoint p in c.contacts) {			//detects ground
 			Vector2 flex = (Vector2) p.point - (Vector2) center;
 			float angle = Mathf.Atan2 (flex.y, flex.x) * Mathf.Rad2Deg;
-			if (angle < -40 && angle > -140){
+			//if (angle < -40 && angle > -140){
+			if (angle < -k_MaxGroundCollisionAngle && angle > k_MaxGroundCollisionAngle-180){
 				m_Grounded = true;
 				m_RemainingJumps = k_MaxJumps;
 			}
@@ -291,7 +296,8 @@ public class RunnerCharacter : MonoBehaviour
 		foreach (ContactPoint p in c.contacts) {			//detects ground
 			Vector2 flex = (Vector2) p.point - (Vector2) center;
 			float angle = Mathf.Atan2 (flex.y, flex.x) * Mathf.Rad2Deg;
-			if (angle < -40 && angle > -140){
+			//if (angle < -40 && angle > -140){
+			if (angle < -k_MaxGroundCollisionAngle && angle > k_MaxGroundCollisionAngle-180){
 				m_Grounded = true;
 				m_RemainingJumps = k_MaxJumps;
 			}
@@ -312,15 +318,5 @@ public class RunnerCharacter : MonoBehaviour
 		else if (other.tag.Equals ("Collectible")) {
 			Destroy (other.gameObject);
 		} 
-		else if (other.tag.Equals ("SidestepMode")) {
-			StartSidestepMode ();
-		}
-		else if (other.tag.Equals ("2DMode")) {
-			Start2DMode ();
-		}
-		//else if (other.tag.Equals ("Rail") && sidestepMode && !canChangeRail) {
-		/*else if (other.tag.Equals ("Rail") && sidestepMode) {
-			RailAlign ();
-		}*/
 	}
 }
