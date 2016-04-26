@@ -32,8 +32,10 @@ public class RunnerCharacter : MonoBehaviour
 	private int rail = 0;					// 1 is left, -1 is right
 	private const float k_RailWidth = 5.0f;
 	[SerializeField] private float m_SidestepForce = 150.0f;
-
 	private bool shiftingBetweenRails = false;
+	private Transform leftCheck;
+	private Transform rightCheck;
+	private const float k_SidestepCheckRadius = 1.0f;
 
 	private bool m_FastFalling = false;
 	private const float k_FastFallSpeed = 60.0f;
@@ -60,6 +62,9 @@ public class RunnerCharacter : MonoBehaviour
 		m_CamOffset = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("CamOffset").transform;
 
 		sidestepPositionFromCamera = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("SidestepPosition").transform;
+
+		leftCheck = transform.Find ("LeftCheck").transform;
+		rightCheck = transform.Find ("RightCheck").transform;
 
 		lastCheckpoint = transform.position;	//first checkpoint is start
 
@@ -124,7 +129,7 @@ public class RunnerCharacter : MonoBehaviour
 
 			//rails
 			if (!shiftingBetweenRails) {
-				if (left && !right && rail != 1) {
+				if (left && !right && rail != 1 && LeftAvailable ()) {
 					rail += 1;
 
 					shiftingBetweenRails = true;
@@ -135,7 +140,7 @@ public class RunnerCharacter : MonoBehaviour
 					railForceLeft = RailForceLeft ();
 					StartCoroutine (railForceLeft);
 				} 
-				else if (right && !left && rail != -1) {
+				else if (right && !left && rail != -1 && RightAvailable ()) {
 					rail -= 1;
 
 					shiftingBetweenRails = true;
@@ -178,6 +183,13 @@ public class RunnerCharacter : MonoBehaviour
 		}
 
 		m_Rigidbody.velocity = tempVel;
+	}
+
+	private bool LeftAvailable(){
+		return !Physics.CheckSphere (leftCheck.position, k_SidestepCheckRadius);
+	}
+	private bool RightAvailable(){
+		return !Physics.CheckSphere (rightCheck.position, k_SidestepCheckRadius);
 	}
 
 	private void RailAlign(){
