@@ -131,7 +131,7 @@ public class RunnerCharacter : MonoBehaviour
 			moveX = 0.0f;
 
 			//rails
-			if (!shiftingBetweenRails) {
+			if (!shiftingBetweenRails && !m_FastFalling) {
 				if (left && !right && rail != 1 && LeftAvailable ()) {
 					prevRail = rail;
 					rail += 1;
@@ -167,7 +167,8 @@ public class RunnerCharacter : MonoBehaviour
 		tempVel.x = moveX * m_MaxSpeed + aml.speed;
 
 		//initiate fastfall
-		if (down && !m_SidestepMode && !m_Grounded && !m_FastFalling) {
+		//if (down && !m_SidestepMode && !m_Grounded && !m_FastFalling) {
+		if (down && !m_Grounded && !m_FastFalling) {
 			m_Anim.SetBool ("FastFall", true);
 			m_FastFalling = true;
 			m_RemainingJumps = 0;
