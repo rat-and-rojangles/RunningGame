@@ -18,8 +18,7 @@ public class CamShaker : MonoBehaviour {
 
 		float elapsed = 0.0f;
 		float xTotal = 0.0f;
-
-		//Vector3 originalCamPos = Camera.main.transform.position;
+		float zTotal = 0.0f;
 
 		while (elapsed < duration) {
 
@@ -31,22 +30,32 @@ public class CamShaker : MonoBehaviour {
 			// map value to [-1, 1]
 			float x = Random.value * 2.0f - 1.0f;
 			float y = Random.value * 2.0f - 1.0f;
+			float z = Random.value * 2.0f - 1.0f;
 			x *= magnitude * damper;
 			y *= magnitude * damper;
+			z *= magnitude * damper;
 
 			xTotal += x;
+			zTotal += z;
 
-			//Camera.main.transform.position = new Vector3(x, y, originalCamPos.z);
-			m_CamOffset.position += ((Vector3.right * x) + (Vector3.up * y)) * Time.unscaledDeltaTime * k_TimeCompensation;
+			m_CamOffset.position += ((Vector3.right * x) + (Vector3.up * y) + (Vector3.forward * z)) * Time.unscaledDeltaTime * k_TimeCompensation;
 
 			yield return null;
 		}
 
-		m_CamOffset.position += (Vector3.left * xTotal);	//undoes x shift
+		int undoSegments = 3;
+		for (int counter = 0; counter < undoSegments; counter++) {
+			m_CamOffset.position += (Vector3.left * xTotal/undoSegments);	//undoes x shift
+			m_CamOffset.position += (Vector3.back * zTotal/undoSegments);	//undoes z shift
+			yield return null;
+		}
 
+		//m_CamOffset.position += (Vector3.left * xTotal);	//undoes x shift
+		//m_CamOffset.position += (Vector3.back * zTotal);	//undoes z shift
 	}
 
 	public void Shake(){
 		StartCoroutine (ShakeCoroutine ());
 	}
 }
+
