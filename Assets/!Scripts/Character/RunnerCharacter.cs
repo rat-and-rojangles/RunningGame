@@ -168,8 +168,13 @@ public class RunnerCharacter : MonoBehaviour
 
 		//initiate fastfall
 		//if (down && !m_SidestepMode && !m_Grounded && !m_FastFalling) {
-		if (down && !m_Grounded && !m_FastFalling) {
+		if (down && !m_Grounded && !m_FastFalling && !shiftingBetweenRails) {
 			m_Anim.SetBool ("FastFall", true);
+
+			StopCoroutine (stopStep);
+			m_Anim.SetBool ("LeftStep", false);
+			m_Anim.SetBool ("RightStep", false);
+
 			m_FastFalling = true;
 			m_RemainingJumps = 0;
 
@@ -285,8 +290,18 @@ public class RunnerCharacter : MonoBehaviour
 		shiftingBetweenRails = false;
 	}
 
+	private void ResetAnimation(){
+		StopCoroutine(camSidestep);
+		StopCoroutine(cam2D);
+		StopCoroutine(railForce);
+		StopCoroutine(stopStep);
+		m_Anim.SetBool ("LeftStep", false);
+		m_Anim.SetBool ("RightStep", false);
+	}
+
 	public void Die(){
-		m_Anim.Play ("Running");
+		//m_Anim.Play ("Running");
+		ResetAnimation ();
 		m_Rigidbody.velocity = Vector3.zero;
 		transform.position = lastCheckpoint;
 		rail = 0;
