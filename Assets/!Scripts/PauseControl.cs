@@ -16,6 +16,8 @@ public class PauseControl : MonoBehaviour {
 	private Transform camZoom;
 	private bool currentlyResettingPauseCam = false;
 
+	private bool hEnabled = false;
+
 	private float zoom;
 
 	private IEnumerator fadeIn;
@@ -62,6 +64,7 @@ public class PauseControl : MonoBehaviour {
 		StartCoroutine (fadeOut);
 	}
 	public void Unpause(){
+		hEnabled = false;
 		StartCoroutine (UnpauseWithCamReset ());
 	}
 
@@ -104,9 +107,15 @@ public class PauseControl : MonoBehaviour {
 
 	void Update(){
 		if (paused && !currentlyResettingPauseCam) {	//krazykam
-			Vector3 tempEuler = camTrans.rotation.eulerAngles;
-			tempEuler += Vector3.down * CrossPlatformInputManager.GetAxisRaw("Horizontal") * Time.unscaledDeltaTime * 100;
-			SetCameraEuler (tempEuler);
+			if(CrossPlatformInputManager.GetButtonDown("Left") || CrossPlatformInputManager.GetButtonDown("Right")){
+				hEnabled = true;
+			}
+
+			if (hEnabled) {
+				Vector3 tempEuler = camTrans.rotation.eulerAngles;
+				tempEuler += Vector3.down * CrossPlatformInputManager.GetAxisRaw ("Horizontal") * Time.unscaledDeltaTime * 100;
+				SetCameraEuler (tempEuler);
+			}
 
 			zoom = Mathf.Clamp (zoom + CrossPlatformInputManager.GetAxisRaw ("Vertical"), -2, -50);
 			//SetZoom (zoom);
