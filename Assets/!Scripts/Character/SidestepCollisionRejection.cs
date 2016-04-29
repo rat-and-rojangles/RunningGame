@@ -11,10 +11,6 @@ public class SidestepCollisionRejection : MonoBehaviour {
 	}
 
 	void OnTriggerEnter(Collider other){
-		print ("enter");
 		character.SideTriggerCollide (direction);
-	}
-	void OnTriggerStay(Collider other){
-		print ("stay");
 	}
 }

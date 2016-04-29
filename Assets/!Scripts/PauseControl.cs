@@ -8,17 +8,26 @@ public class PauseControl : MonoBehaviour {
 	private AudioLowPassFilter musicLowPass;
 	[SerializeField] private float musicMinFQ = 450.0f;
 
+	private Transform character;
+	private const float k_CamYOffset = 3.0f;
+
 	private Vector3 camLastEuler;
 	private Transform camTrans;
+	private Transform camZoom;
 	private bool currentlyResettingPauseCam = false;
+
+	private float zoom;
 
 	private IEnumerator fadeIn;
 	private IEnumerator fadeOut;
 
 	// Use this for initialization
 	void Awake () {
+		character = GameObject.FindGameObjectWithTag ("Player").transform;
+
 		musicLowPass = GameObject.FindGameObjectWithTag ("MusicController").GetComponent<AudioLowPassFilter> ();
 		camTrans = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("CamOffset").transform;
+		camZoom = GameObject.FindGameObjectWithTag ("MainCamera").transform;
 
 		fadeIn = FadeIn ();
 		fadeOut = FadeOut ();
@@ -45,20 +54,13 @@ public class PauseControl : MonoBehaviour {
 
 		camLastEuler = camTrans.rotation.eulerAngles;
 
+		//zoom = camZoom.position.z;
+		//camTrans.position = new Vector3 (character.position.x, character.position.y - k_CamYOffset, camTrans.position.z);
+
 		StopCoroutine (fadeIn);
 		fadeOut = FadeOut ();
 		StartCoroutine (fadeOut);
 	}
-	/*public void Unpause(){
-		SetCameraEuler (camLastEuler);
-
-		paused = false;
-		Time.timeScale = 1.0f;
-
-		StopCoroutine (fadeOut);
-		fadeIn = FadeIn ();
-		StartCoroutine (fadeIn);
-	}*/
 	public void Unpause(){
 		StartCoroutine (UnpauseWithCamReset ());
 	}
@@ -80,25 +82,11 @@ public class PauseControl : MonoBehaviour {
 	}
 
 	private IEnumerator UnpauseWithCamReset(){
-		//float total = camTrans.rotation.eulerAngles.y - camLastEuler.y;
-		/*int undoSegments = 25;
-		for (int counter = 0; counter < undoSegments; counter++) {
-			Vector3 tempEuler = camTrans.rotation.eulerAngles;
-			tempEuler += (Vector3.down * total/undoSegments);	//undoes x shift
-			SetCameraEuler (tempEuler);
-			yield return null;
-		}*/
 		currentlyResettingPauseCam = true;
 
 		float rate = 10.0f;
-		//while (!camLastEuler.Equals(camTrans.rotation.eulerAngles)) {
 		while (!AlmostEquals(camLastEuler.y, camTrans.rotation.eulerAngles.y)) {
-			//print (camTrans.rotation.eulerAngles);
-			//print (camLastEuler);
-			//print(rate * Time.unscaledDeltaTime);
-
 			SetCameraEuler (Vector3.Lerp (camTrans.rotation.eulerAngles, camLastEuler, rate * Time.unscaledDeltaTime));
-			//SetCameraEuler(camLastEuler);
 			rate += Time.unscaledDeltaTime * 5;
 			yield return null;
 		}
@@ -118,8 +106,10 @@ public class PauseControl : MonoBehaviour {
 		if (paused && !currentlyResettingPauseCam) {	//krazykam
 			Vector3 tempEuler = camTrans.rotation.eulerAngles;
 			tempEuler += Vector3.down * CrossPlatformInputManager.GetAxisRaw("Horizontal") * Time.unscaledDeltaTime * 100;
-			//tempEuler += Vector3.right * CrossPlatformInputManager.GetAxisRaw("Vertical") * Time.unscaledDeltaTime * 100;
 			SetCameraEuler (tempEuler);
+
+			zoom = Mathf.Clamp (zoom + CrossPlatformInputManager.GetAxisRaw ("Vertical"), -2, -50);
+			//SetZoom (zoom);
 		}
 	}
 
@@ -127,6 +117,11 @@ public class PauseControl : MonoBehaviour {
 		Quaternion tempQ = camTrans.rotation;
 		tempQ.eulerAngles = euler;
 		camTrans.rotation = tempQ;
+	}
+	private void SetZoom(float z){
+		Vector3 tempZoom = camZoom.position;
+		tempZoom.z = z;
+		camZoom.position = tempZoom;
 	}
 
 	private bool AlmostEquals(float a, float b){
