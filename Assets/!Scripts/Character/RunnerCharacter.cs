@@ -291,16 +291,17 @@ public class RunnerCharacter : MonoBehaviour
 	}
 
 	private void ResetAnimation(){
-		StopCoroutine(camSidestep);
-		StopCoroutine(cam2D);
+		//StopCoroutine(camSidestep);
+		//StopCoroutine(cam2D);
 		StopCoroutine(railForce);
 		StopCoroutine(stopStep);
 		m_Anim.SetBool ("LeftStep", false);
 		m_Anim.SetBool ("RightStep", false);
+		m_Anim.Play ("Running");
 	}
 
 	public void Die(){
-		//m_Anim.Play ("Running");
+		m_FastFalling = false;
 		ResetAnimation ();
 		m_Rigidbody.velocity = Vector3.zero;
 		transform.position = lastCheckpoint;
