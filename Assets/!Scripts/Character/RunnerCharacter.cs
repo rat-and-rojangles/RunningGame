@@ -200,6 +200,8 @@ public class RunnerCharacter : MonoBehaviour
 
 		if (vAxis >= 0.99) {
 			m_Anim.SetBool ("Dancing", true);
+			aml.speed = 0.0f;
+			//m_Anim.Play ("Dancing");
 		}
 	}
 

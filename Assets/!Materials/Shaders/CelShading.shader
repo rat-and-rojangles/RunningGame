@@ -21,6 +21,8 @@
       	//tells the cg to use a vertex-shader called vert
       	#pragma fragment frag
       	//tells the cg to use a fragment-shader called frag
+
+      	#include "AutoLight.cginc"	//added
       	
       	//== User defined ==//
       	
@@ -44,7 +46,7 @@
       	float4 vertex : POSITION;
       	float3 normal : NORMAL;
       	float4 texcoord : TEXCOORD0;
-      		 
+
       	};
       	
       	struct vertexOutput {
@@ -54,10 +56,17 @@
            	float4 lightDir : TEXCOORD2;
            	float3 viewDir : TEXCOORD3;
       		float2 uv : TEXCOORD0; 
+
+      		//added
+      		LIGHTING_COORDS(2,3) // replace 0 and 1 with the next available TEXCOORDs in your shader, don't put a semicolon at the end of this line.
+
+      		
+
       	};
       	
       	vertexOutput vert(vertexInput input)
       	{
+      		
       		vertexOutput output;
       		
       		//normalDirection
@@ -81,7 +90,11 @@
       		
       		//UV-Map
       		output.uv =input.texcoord;
-      		
+
+      		//added
+      		TRANSFER_VERTEX_TO_FRAGMENT(output); // Calculates shadow and light attenuation and passes it to the frag shader.
+ 
+
       		return output;
       	  
       	}
@@ -106,6 +119,9 @@
 	float3 specularReflection = _SpecColor.xyz * specularCutoff;
 		
 	float3 combinedLight = (ambientLight + diffuseReflection) * outlineStrength + specularReflection;
+
+	//added
+	float atten = LIGHT_ATTENUATION(input); // This is a float for your shadow/attenuation value, multiply your lighting value by this to get shadows. Replace i with whatever you've defined your input struct to be called (e.g. frag(v2f [b]i[/b]) : COLOR { ... ).
 			
 	return float4(combinedLight, 1.0); // + tex2D(_MainTex, input.uv); // DELETE LINE COMMENTS & ';' TO ENABLE TEXTURE
 		
@@ -118,5 +134,6 @@
 
    
    }
-
+   FallBack "Diffuse"
 }
+
