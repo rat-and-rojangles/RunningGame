@@ -64,6 +64,8 @@ public class RunnerCharacter : MonoBehaviour
 
 		sidestepPositionFromCamera = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("SidestepPosition").transform;
 
+		m_Anim.SetFloat ("AutoMoveSpeed", Mathf.Sqrt(aml.speed)/5);
+
 		//leftCheck = transform.Find ("LeftCheck").transform;
 		//rightCheck = transform.Find ("RightCheck").transform;
 
@@ -195,6 +197,10 @@ public class RunnerCharacter : MonoBehaviour
 		}
 
 		m_Rigidbody.velocity = tempVel;
+
+		if (vAxis >= 0.99) {
+			m_Anim.SetBool ("Dancing", true);
+		}
 	}
 
 	private bool LeftAvailable(){

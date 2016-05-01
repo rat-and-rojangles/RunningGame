@@ -8,8 +8,9 @@ public class PauseControl : MonoBehaviour {
 	private AudioLowPassFilter musicLowPass;
 	[SerializeField] private float musicMinFQ = 450.0f;
 
-	private Transform character;
+	private Transform characterTrans;
 	private const float k_CamYOffset = 3.0f;
+	private RunnerCharacter characterControl;
 
 	private Vector3 camLastEuler;
 	private Transform camTrans;
@@ -25,7 +26,8 @@ public class PauseControl : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
-		character = GameObject.FindGameObjectWithTag ("Player").transform;
+		characterTrans = GameObject.FindGameObjectWithTag ("Player").transform;
+		characterControl = GameObject.FindGameObjectWithTag ("Player").GetComponent<RunnerCharacter>();
 
 		musicLowPass = GameObject.FindGameObjectWithTag ("MusicController").GetComponent<AudioLowPassFilter> ();
 		camTrans = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("CamOffset").transform;

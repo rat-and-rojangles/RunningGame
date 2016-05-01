@@ -3,14 +3,10 @@ using System.Collections;
 
 public class FadeBehind : MonoBehaviour {
 
-	//private Transform playerTrans;
-	private Transform perfectPos;
-
-	private RunnerCharacter playerControl;
-
+	private Transform camTrans;
 	private Material m_Mat;
 
-	private const float k_FadeRate = 5.0f;
+	private const float k_Offset = 0.5f;
 	private const float k_MinFade = 0.05f;
 
 	private IEnumerator fadeIn;
@@ -19,45 +15,51 @@ public class FadeBehind : MonoBehaviour {
 	private bool forgotten = false;
 	private bool forgottenLast;
 
+	private AutoMoveLevel autoMover;
+
+	private const float k_DisappearDistance = 13.0f;
+
+	private RunnerCharacter player;
+	private PauseControl pause;
 
 	void Awake() {
 		fadeIn = FadeIn ();
 		fadeOut = FadeOut ();
 
-		//playerTrans = GameObject.FindGameObjectWithTag ("Player").transform;
-		playerControl = GameObject.FindGameObjectWithTag ("Player").GetComponent<RunnerCharacter>();
-		perfectPos = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("SidestepPosition").transform;
+		autoMover = GameObject.FindGameObjectWithTag ("GameController").GetComponent<AutoMoveLevel> ();
 		m_Mat = GetComponent<Renderer> ().material;
 
-		CheckBehind ();
+		camTrans = GameObject.FindGameObjectWithTag ("MainCamera").transform;
+
+		player = GameObject.FindGameObjectWithTag ("Player").GetComponent<RunnerCharacter> ();
+		pause = GameObject.FindGameObjectWithTag ("GameController").GetComponent<PauseControl> ();
+
+		CheckForgotten ();
 		forgottenLast = forgotten;
 	}
 
+	private float FadeRate(){
+		return autoMover.speed / 4;
+	}
+
 	void Update() {
-		CheckBehind ();
+		CheckForgotten ();
 	}
 
 	void LateUpdate(){
 		if (forgotten != forgottenLast) {
 			if (forgotten) {
-				print ("4gotten");
-				fadeOut = FadeOut ();
-				StopCoroutine (fadeIn);
-				StartCoroutine (fadeOut);
+				Disappear ();
 			}
 			else {
-				print ("5gotten");
-				fadeIn = FadeIn ();
-				StopCoroutine (fadeOut);
-				StartCoroutine (fadeIn);
+				Reappear ();
 			}
 		}
 		forgottenLast = forgotten;
 	}
 
-	void CheckBehind() {
-		//if (playerTrans.position.x > perfectPos.position.x && playerControl.GetSidestepMode ()) {
-		if (perfectPos.position.x > transform.position.x && playerControl.GetSidestepMode ()) {
+	void CheckForgotten() {
+		if (Vector3.Distance(camTrans.position, transform.position) < k_DisappearDistance && DisappearEnabled ()) {
 			forgotten = true;
 		} 
 		else {
@@ -65,10 +67,30 @@ public class FadeBehind : MonoBehaviour {
 		}
 	}
 
+	private bool DisappearEnabled(){
+		return player.GetSidestepMode () || pause.IsPaused ();
+	}
+
+	public void Reappear(){
+		fadeIn = FadeIn ();
+		StopCoroutine (fadeOut);
+		StartCoroutine (fadeIn);
+	}
+
+	public void Disappear(){
+		fadeOut = FadeOut ();
+		StopCoroutine (fadeIn);
+		StartCoroutine (fadeOut);
+	}
+
+	public bool IsForgotten(){
+		return forgotten;
+	}
+
 	private IEnumerator FadeIn(){
 		while (m_Mat.color.a < 1) {
 			Color temp = m_Mat.color;
-			temp.a += Time.deltaTime * k_FadeRate;
+			temp.a += Time.unscaledDeltaTime * FadeRate ();
 			m_Mat.color = temp;
 			yield return null;
 		}
@@ -80,7 +102,7 @@ public class FadeBehind : MonoBehaviour {
 	private IEnumerator FadeOut(){
 		while (m_Mat.color.a > k_MinFade) {
 			Color temp = m_Mat.color;
-			temp.a -= Time.deltaTime * k_FadeRate;
+			temp.a -= Time.unscaledDeltaTime * FadeRate ();
 			m_Mat.color = temp;
 			yield return null;
 		}
