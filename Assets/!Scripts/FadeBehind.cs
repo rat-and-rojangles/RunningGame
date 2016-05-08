@@ -8,7 +8,7 @@ public class FadeBehind : MonoBehaviour {
 	private Material m_Mat;
 
 	private const float k_Offset = 0.0f;
-	private const float k_MinFade = 0.1f;
+	private const float k_MinFade = 0.25f;
 	private const float k_PauseFadeRate = 5.0f;
 
 	private IEnumerator fadeIn;
@@ -84,7 +84,7 @@ public class FadeBehind : MonoBehaviour {
 			return Vector3.Distance (camTrans.position, transform.position) < k_CameraDistance;	//distance to camera
 		}
 		else if (player.GetSidestepMode ()) {
-			return playerTrans.position.x > transform.position.x + (m_Mesh.bounds.extents.x)*transform.lossyScale.x - k_Offset;	//player is past
+			return playerTrans.position.x > transform.position.x - (m_Mesh.bounds.extents.x)*transform.lossyScale.x + k_Offset;	//player is past
 		}
 		else {
 			return false;

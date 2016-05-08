@@ -52,7 +52,7 @@ public class CharacterUserControl : MonoBehaviour
 
 		if (pauseControl.IsPaused()) {	// allows for restarting the level while paused
 			if (Input.GetKeyUp (KeyCode.Backspace)) {
-				m_Character.Die ();
+				m_Character.Restart ();
 				pauseControl.Unpause ();
 			}
 		}
@@ -67,7 +67,7 @@ public class CharacterUserControl : MonoBehaviour
 		float v = CrossPlatformInputManager.GetAxis("Vertical");
 
         // Pass all parameters to the character control script.
-		m_Character.Move(m_Jump, m_Left, m_Right);
+		m_Character.Move(m_Jump, m_Left, m_Right, Input.GetKey(KeyCode.C));
 		if (m_Switch) {
 			m_Character.ToggleMovementMode ();
 		}
