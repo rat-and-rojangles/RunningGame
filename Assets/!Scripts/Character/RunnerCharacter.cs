@@ -41,6 +41,7 @@ public class RunnerCharacter : MonoBehaviour
 	private bool m_FastFalling = false;
 	private const float k_FastFallSpeed = 60.0f;
 	private CamShaker m_CamShaker;
+	private float camShakeHeight;
 
 	private Transform sidestepPositionFromCamera;
 
@@ -120,7 +121,8 @@ public class RunnerCharacter : MonoBehaviour
 		if (m_Grounded && m_FastFalling) {
 			m_FastFalling = false;
 			m_Anim.SetBool ("FastFall", false);
-			m_CamShaker.Shake ();
+			//m_CamShaker.Shake (1.0f);
+			m_CamShaker.Shake ((camShakeHeight - transform.position.y) / 20 );
 		}
 
 		m_Anim.SetFloat("hAxis", Mathf.Abs(hAxis));
@@ -169,7 +171,6 @@ public class RunnerCharacter : MonoBehaviour
 		tempVel.x = moveX * m_MaxSpeed + aml.speed;
 
 		//initiate fastfall
-		//if (down && !m_SidestepMode && !m_Grounded && !m_FastFalling) {
 		if (down && !m_Grounded && !m_FastFalling && !shiftingBetweenRails) {
 			m_Anim.SetBool ("FastFall", true);
 
@@ -179,6 +180,8 @@ public class RunnerCharacter : MonoBehaviour
 
 			m_FastFalling = true;
 			m_RemainingJumps = 0;
+
+			camShakeHeight = transform.position.y;
 
 			//SLAM!
 			tempVel.y = -k_FastFallSpeed;
@@ -303,6 +306,7 @@ public class RunnerCharacter : MonoBehaviour
 		//StopCoroutine(cam2D);
 		StopCoroutine(railForce);
 		StopCoroutine(stopStep);
+		m_Anim.SetBool ("FastFall", false);
 		m_Anim.SetBool ("LeftStep", false);
 		m_Anim.SetBool ("RightStep", false);
 		m_Anim.Play ("Running");
@@ -366,10 +370,22 @@ public class RunnerCharacter : MonoBehaviour
 
 	public void SideTriggerCollide(int direction){
 		if (shiftingBetweenRails) {
-			if (prevRail + direction == rail) {		//if moving in the right direction
+			if (prevRail + direction == rail) {		//if moving in the correct direction
+
+				//switches previous rail and current rail
 				int temp = rail;
 				rail = prevRail;
 				prevRail = temp;
+
+				if (rail > prevRail) {
+					m_Anim.SetBool ("LeftStep", true);
+					m_Anim.SetBool ("RightStep", false);
+				}
+				else {
+					m_Anim.SetBool ("LeftStep", false);
+					m_Anim.SetBool ("RightStep", true);
+				}
+
 				m_RailForceSign = m_RailForceSign * -1;
 			}
 		}

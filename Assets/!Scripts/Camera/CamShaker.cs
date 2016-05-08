@@ -4,7 +4,7 @@ using System.Collections;
 public class CamShaker : MonoBehaviour {
 
 	[SerializeField] private float duration = 0.25f;
-	[SerializeField] private float magnitude = 1.0f;
+	//[SerializeField] private float magnitude = 1.0f;
 
 	private const float k_TimeCompensation = 50.0f;
 
@@ -14,7 +14,7 @@ public class CamShaker : MonoBehaviour {
 		m_CamOffset = GameObject.FindGameObjectWithTag ("CameraController").transform;
 	}
 
-	private IEnumerator ShakeCoroutine() {
+	private IEnumerator ShakeCoroutine(float magnitude) {
 
 		float elapsed = 0.0f;
 		float xTotal = 0.0f;
@@ -54,8 +54,8 @@ public class CamShaker : MonoBehaviour {
 		//m_CamOffset.position += (Vector3.back * zTotal);	//undoes z shift
 	}
 
-	public void Shake(){
-		StartCoroutine (ShakeCoroutine ());
+	public void Shake(float mag){
+		StartCoroutine (ShakeCoroutine (mag));
 	}
 }
 

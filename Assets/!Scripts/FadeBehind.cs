@@ -4,10 +4,12 @@ using System.Collections;
 public class FadeBehind : MonoBehaviour {
 
 	private Transform camTrans;
+	private Transform playerTrans;
 	private Material m_Mat;
 
-	private const float k_Offset = 0.5f;
-	private const float k_MinFade = 0.05f;
+	private const float k_Offset = 0.0f;
+	private const float k_MinFade = 0.1f;
+	private const float k_PauseFadeRate = 5.0f;
 
 	private IEnumerator fadeIn;
 	private IEnumerator fadeOut;
@@ -17,10 +19,12 @@ public class FadeBehind : MonoBehaviour {
 
 	private AutoMoveLevel autoMover;
 
-	private const float k_DisappearDistance = 13.0f;
+	private const float k_CameraDistance = 10.0f;
 
 	private RunnerCharacter player;
 	private PauseControl pause;
+
+	private Mesh m_Mesh;
 
 	void Awake() {
 		fadeIn = FadeIn ();
@@ -32,18 +36,26 @@ public class FadeBehind : MonoBehaviour {
 		camTrans = GameObject.FindGameObjectWithTag ("MainCamera").transform;
 
 		player = GameObject.FindGameObjectWithTag ("Player").GetComponent<RunnerCharacter> ();
+		playerTrans = GameObject.FindGameObjectWithTag ("Player").transform;
 		pause = GameObject.FindGameObjectWithTag ("GameController").GetComponent<PauseControl> ();
 
-		CheckForgotten ();
+		m_Mesh = GetComponent<MeshFilter> ().mesh;
+
+		RefreshForgotten ();
 		forgottenLast = forgotten;
 	}
 
 	private float FadeRate(){
-		return autoMover.speed / 4;
+		if (pause.IsPaused ()) {
+			return k_PauseFadeRate;
+		}
+		else {
+			return autoMover.speed / 4;
+		}
 	}
 
 	void Update() {
-		CheckForgotten ();
+		RefreshForgotten ();
 	}
 
 	void LateUpdate(){
@@ -58,8 +70,8 @@ public class FadeBehind : MonoBehaviour {
 		forgottenLast = forgotten;
 	}
 
-	void CheckForgotten() {
-		if (Vector3.Distance(camTrans.position, transform.position) < k_DisappearDistance && DisappearEnabled ()) {
+	void RefreshForgotten() {
+		if (ForgottenCondition ()) {
 			forgotten = true;
 		} 
 		else {
@@ -67,8 +79,16 @@ public class FadeBehind : MonoBehaviour {
 		}
 	}
 
-	private bool DisappearEnabled(){
-		return player.GetSidestepMode () || pause.IsPaused ();
+	private bool ForgottenCondition(){
+		if (pause.IsPaused ()) {
+			return Vector3.Distance (camTrans.position, transform.position) < k_CameraDistance;	//distance to camera
+		}
+		else if (player.GetSidestepMode ()) {
+			return playerTrans.position.x > transform.position.x + (m_Mesh.bounds.extents.x)*transform.lossyScale.x - k_Offset;	//player is past
+		}
+		else {
+			return false;
+		}
 	}
 
 	public void Reappear(){
