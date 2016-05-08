@@ -67,7 +67,7 @@ public class CharacterUserControl : MonoBehaviour
 		float v = CrossPlatformInputManager.GetAxis("Vertical");
 
         // Pass all parameters to the character control script.
-		m_Character.Move(h, v, m_Jump, m_Left, m_Right, m_Down);
+		m_Character.Move(m_Jump, m_Left, m_Right);
 		if (m_Switch) {
 			m_Character.ToggleMovementMode ();
 		}

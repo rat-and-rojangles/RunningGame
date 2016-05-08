@@ -6,13 +6,13 @@ using System.Collections;
 public class RunnerCharacter : MonoBehaviour
 {
     [SerializeField] private float m_MaxSpeed = 10f;                    // The fastest the player can travel in the x axis.
-	[SerializeField] private float m_JumpVelocity = 15f;                // Upward velocity when the player jumps.
+	[SerializeField] private float m_JumpStrength = 15f;                // Upward velocity when the player jumps.
     //[SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
 
 	private bool m_Grounded;			// Whether or not the player is grounded.
     private Animator m_Anim;			// Reference to the player's animator component.
 	private Rigidbody m_Rigidbody;
-	private CapsuleCollider m_Capsule;
+	private BoxCollider m_BoxCollider;
 
 	const int k_MaxJumps = 1;
 	private int m_RemainingJumps;
@@ -22,8 +22,6 @@ public class RunnerCharacter : MonoBehaviour
 	private Transform m_CamOffset;
 
 	private bool groundedLastFrame = true;		//used for smoothing bumps in animator
-
-	private float k_MaxGroundCollisionAngle = 20.0f;
 
 	[SerializeField] private float m_GravityStrength = 1500.0f;
 	private Vector3 m_PersonalGravity;
@@ -38,13 +36,6 @@ public class RunnerCharacter : MonoBehaviour
 	private Transform rightCheck;
 	private int m_RailForceSign;
 
-	private bool m_FastFalling = false;
-	private const float k_FastFallSpeed = 60.0f;
-	private CamShaker m_CamShaker;
-	private float camShakeHeight;
-
-	private Transform sidestepPositionFromCamera;
-
 	//coroutines that can be stopped
 	private IEnumerator camSidestep;
 	private IEnumerator cam2D;
@@ -58,21 +49,14 @@ public class RunnerCharacter : MonoBehaviour
         // Setting up references.
 		m_Anim = GetComponentInChildren<Animator>();
         m_Rigidbody = GetComponent<Rigidbody>();
-		m_Capsule = GetComponent<CapsuleCollider>();
+		m_BoxCollider = GetComponent<BoxCollider>();
 
 		aml = GameObject.FindGameObjectWithTag ("GameController").GetComponent<AutoMoveLevel> ();
 		m_CamOffset = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("CamOffset").transform;
 
-		sidestepPositionFromCamera = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("SidestepPosition").transform;
-
 		m_Anim.SetFloat ("AutoMoveSpeed", Mathf.Sqrt(aml.speed)/5);
 
-		//leftCheck = transform.Find ("LeftCheck").transform;
-		//rightCheck = transform.Find ("RightCheck").transform;
-
 		lastCheckpoint = transform.position;	//first checkpoint is start
-
-		m_CamShaker = GetComponent<CamShaker> ();
 
 		m_Grounded = true;
 		m_Rigidbody.useGravity = false;
@@ -92,6 +76,17 @@ public class RunnerCharacter : MonoBehaviour
 
     private void FixedUpdate()
     {
+
+		//ground check
+		Vector3 feet = transform.position;
+		feet.y = m_BoxCollider.bounds.min.y;
+		if (Physics.CheckSphere (feet + Vector3.down*m_BoxCollider.bounds.extents.x, m_BoxCollider.bounds.extents.x/2)){
+			m_Grounded = true;
+			m_RemainingJumps = k_MaxJumps;
+		} else {
+			m_Grounded = false;
+		}
+
 		//floating cheat
 		if (Input.GetKey (KeyCode.Backspace)) {
 			m_Rigidbody.AddForce (-2 * m_PersonalGravity * Time.fixedDeltaTime);	
@@ -102,30 +97,11 @@ public class RunnerCharacter : MonoBehaviour
 
 		//gravity
 		m_Rigidbody.AddForce (m_PersonalGravity * Time.fixedDeltaTime);
-
-		//keeping perfect distance from camera
-		if (m_SidestepMode) {
-			if (transform.position.x > sidestepPositionFromCamera.position.x) {
-				m_Rigidbody.AddForce (Vector3.left * (transform.position.x - sidestepPositionFromCamera.position.x) * 150);
-			}
-			else if (transform.position.x < sidestepPositionFromCamera.position.x) {
-				m_Rigidbody.AddForce (Vector3.right * (sidestepPositionFromCamera.position.x - transform.position.x) * 150);
-			}
-		}
     }
 
-	public void Move(float hAxis, float vAxis, bool jump, bool left, bool right, bool down) {
+	public void Move(bool jump, bool left, bool right) {
 		m_Anim.SetBool ("Ground", m_Grounded || groundedLastFrame);		//for smoothing
 		groundedLastFrame = m_Grounded;
-
-		if (m_Grounded && m_FastFalling) {
-			m_FastFalling = false;
-			m_Anim.SetBool ("FastFall", false);
-			//m_CamShaker.Shake (1.0f);
-			m_CamShaker.Shake ((camShakeHeight - transform.position.y) / 20 );
-		}
-
-		m_Anim.SetFloat("hAxis", Mathf.Abs(hAxis));
 
 		m_Anim.SetBool("JumpFire", false);
 
@@ -135,8 +111,8 @@ public class RunnerCharacter : MonoBehaviour
 			moveX = 0.0f;
 
 			//rails
-			if (!shiftingBetweenRails && !m_FastFalling) {
-				if (left && !right && rail != 1 && LeftAvailable ()) {
+			if (!shiftingBetweenRails) {
+				if (left && !right && rail != 1) {
 					prevRail = rail;
 					rail += 1;
 
@@ -148,7 +124,7 @@ public class RunnerCharacter : MonoBehaviour
 					railForce = RailForce ();
 					StartCoroutine (railForce);
 				} 
-				else if (right && !left && rail != -1 && RightAvailable ()) {
+				else if (right && !left && rail != -1) {
 					prevRail = rail;
 					rail -= 1;
 
@@ -162,35 +138,14 @@ public class RunnerCharacter : MonoBehaviour
 				}
 			}
 		}
-		else {
-			moveX = hAxis;
-		}
 
 		// Move the character
 		Vector3 tempVel = m_Rigidbody.velocity;
-		tempVel.x = moveX * m_MaxSpeed + aml.speed;
-
-		//initiate fastfall
-		if (down && !m_Grounded && !m_FastFalling && !shiftingBetweenRails) {
-			m_Anim.SetBool ("FastFall", true);
-
-			StopCoroutine (stopStep);
-			m_Anim.SetBool ("LeftStep", false);
-			m_Anim.SetBool ("RightStep", false);
-
-			m_FastFalling = true;
-			m_RemainingJumps = 0;
-
-			camShakeHeight = transform.position.y;
-
-			//SLAM!
-			tempVel.y = -k_FastFallSpeed;
-			m_Rigidbody.velocity = tempVel;
-		}
+		tempVel.x = aml.speed;
 
 		// If the player should jump...
 		if (m_RemainingJumps > 0 && jump) {
-			tempVel.y = m_JumpVelocity;
+			tempVel.y = m_JumpStrength;
 			m_RemainingJumps--;
 
 			m_Grounded = false;
@@ -200,21 +155,6 @@ public class RunnerCharacter : MonoBehaviour
 		}
 
 		m_Rigidbody.velocity = tempVel;
-
-		if (vAxis >= 0.99) {
-			m_Anim.SetBool ("Dancing", true);
-			aml.speed = 0.0f;
-			//m_Anim.Play ("Dancing");
-		}
-	}
-
-	private bool LeftAvailable(){
-		//return !Physics.CheckSphere (leftCheck.position, k_SidestepCheckRadius);
-		return true;
-	}
-	private bool RightAvailable(){
-		//return !Physics.CheckSphere (rightCheck.position, k_SidestepCheckRadius);
-		return true;
 	}
 
 	private void RailAlign(){
@@ -251,6 +191,28 @@ public class RunnerCharacter : MonoBehaviour
 		StopCoroutine (camSidestep);
 		cam2D = Camera2DAngle ();
 		StartCoroutine (cam2D);
+
+		/*
+		//jump back to rail 0
+		if (rail == -1) {
+			prevRail = rail;
+			rail = 0;
+
+			shiftingBetweenRails = true;
+
+			railForce = RailForce ();
+			StartCoroutine (railForce);
+		} 
+		else if (rail == 1) {
+			prevRail = rail;
+			rail = 0;
+
+			shiftingBetweenRails = true;
+
+			railForce = RailForce ();
+			StartCoroutine (railForce);
+		}*/
+
 	}
 
 	public void ToggleMovementMode(){
@@ -302,8 +264,6 @@ public class RunnerCharacter : MonoBehaviour
 	}
 
 	private void ResetAnimation(){
-		//StopCoroutine(camSidestep);
-		//StopCoroutine(cam2D);
 		StopCoroutine(railForce);
 		StopCoroutine(stopStep);
 		m_Anim.SetBool ("FastFall", false);
@@ -313,7 +273,6 @@ public class RunnerCharacter : MonoBehaviour
 	}
 
 	public void Die(){
-		m_FastFalling = false;
 		ResetAnimation ();
 		m_Rigidbody.velocity = Vector3.zero;
 		transform.position = lastCheckpoint;
@@ -327,8 +286,8 @@ public class RunnerCharacter : MonoBehaviour
 		tempCam.position = tempCamPos;
 	}
 
-	void OnCollisionEnter(Collision c){
-		Vector3 center = m_Capsule.bounds.center;
+	/*void OnCollisionEnter(Collision c){
+		Vector3 center = m_BoxCollider.bounds.center;
 		foreach (ContactPoint p in c.contacts) {			//detects ground
 			Vector3 flex = p.point - center;
 			float angle = Mathf.Atan2 (flex.y, flex.x) * Mathf.Rad2Deg;
@@ -340,7 +299,7 @@ public class RunnerCharacter : MonoBehaviour
 		}
 	}
 	void OnCollisionStay(Collision c){
-		Vector3 center = m_Capsule.bounds.center;
+		Vector3 center = m_BoxCollider.bounds.center;
 		foreach (ContactPoint p in c.contacts) {			//detects ground
 			Vector3 flex = p.point - center;
 			float angle = Mathf.Atan2 (flex.y, flex.x) * Mathf.Rad2Deg;
@@ -353,7 +312,7 @@ public class RunnerCharacter : MonoBehaviour
 	}
 	void OnCollisionExit(Collision c){
 		m_Grounded = false;
-	}
+	}*/
 
 
 	void OnTriggerEnter(Collider other){
