@@ -113,28 +113,10 @@ public class RunnerCharacter : MonoBehaviour
 			if (m_SidestepMode) {
 				//rails
 				if (!shiftingBetweenRails) {
-					if (left && !right && rail != 1) {
-						prevRail = rail;
-						rail += 1;
-
-						shiftingBetweenRails = true;
-
-						StopCoroutine (stopStep);	//stops the sidestep animation from cancelling on quickly successive steps
-						m_Anim.SetBool ("LeftStep", true);
-						m_Anim.SetBool ("RightStep", false);
-						railForce = RailForce ();
-						StartCoroutine (railForce);
-					} else if (right && !left && rail != -1) {
-						prevRail = rail;
-						rail -= 1;
-
-						shiftingBetweenRails = true;
-
-						StopCoroutine (stopStep);	//stops the sidestep animation from cancelling on quickly successive steps
-						m_Anim.SetBool ("RightStep", true);
-						m_Anim.SetBool ("LeftStep", false);
-						railForce = RailForce ();
-						StartCoroutine (railForce);
+					if (left && !right) {
+						RailJumpLeft ();
+					} else if (right && !left) {
+						RailJumpRight ();
 					}
 				}
 			} else {
@@ -153,6 +135,35 @@ public class RunnerCharacter : MonoBehaviour
 		}
 		else if (jump) {
 			Restart ();
+		}
+	}
+
+	public void RailJumpLeft(){
+		if (rail != 1) {
+			prevRail = rail;
+			rail += 1;
+
+			shiftingBetweenRails = true;
+
+			StopCoroutine (stopStep);	//stops the sidestep animation from cancelling on quickly successive steps
+			m_Anim.SetBool ("LeftStep", true);
+			m_Anim.SetBool ("RightStep", false);
+			railForce = RailForce ();
+			StartCoroutine (railForce);
+		}
+	}
+	public void RailJumpRight(){
+		if (rail != -1) {
+			prevRail = rail;
+			rail -= 1;
+
+			shiftingBetweenRails = true;
+
+			StopCoroutine (stopStep);	//stops the sidestep animation from cancelling on quickly successive steps
+			m_Anim.SetBool ("RightStep", true);
+			m_Anim.SetBool ("LeftStep", false);
+			railForce = RailForce ();
+			StartCoroutine (railForce);
 		}
 	}
 

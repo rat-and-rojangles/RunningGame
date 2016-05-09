@@ -39,7 +39,7 @@ public class TouchControl : MonoBehaviour {
 	
 	private void OnTap(object sender, System.EventArgs e){
 		Write ("tapped " + RDigit ());
-		m_Control.Tapped ();
+		m_Control.Tapped (tapGesture.NormalizedScreenPosition.x);
 	}
 
 	private void OnTransformStart(object sender, System.EventArgs e){

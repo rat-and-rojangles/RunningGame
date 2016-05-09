@@ -13,19 +13,28 @@ public class CharacterUserControl : MonoBehaviour
 	private bool m_Down;
 	private bool m_Switch;
 
-	private CharacterTouchInput touchInput;
-
+	private Camera mainCam;
 	private PauseControl pauseControl;
 
     private void Awake()
     {
         m_Character = GetComponent<RunnerCharacter>();
 		pauseControl = GameObject.FindGameObjectWithTag ("GameController").GetComponent<PauseControl> ();
-		touchInput = GetComponent<CharacterTouchInput> ();
+		mainCam = GameObject.FindGameObjectWithTag ("MainCamera").GetComponent<Camera> ();
     }
 
-	public void Tapped(){
+	public void Tapped(float screenPosX){
 		m_Jump = true;
+		if (m_Character.GetSidestepMode ()) {
+			if (mainCam.WorldToViewportPoint (transform.position).x > screenPosX) {
+				//m_Character.RailJumpLeft ();
+				m_Left = true;
+			}
+			else if (mainCam.WorldToViewportPoint (transform.position).x < screenPosX) {
+				//m_Character.RailJumpRight ();
+				m_Right = true;
+			}
+		}
 	}
 	public void SwipeLeft(){
 		if (m_Character.GetSidestepMode ()) {
