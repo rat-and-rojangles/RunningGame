@@ -17,6 +17,7 @@ public class RunnerCharacter : MonoBehaviour
 	const int k_MaxJumps = 2;
 	private int m_RemainingJumps;
 	private bool fallen = false;
+	private bool groundedLastFrame;
 
 	private AutoMoveLevel aml;
 	private Vector3 lastCheckpoint;
@@ -58,6 +59,7 @@ public class RunnerCharacter : MonoBehaviour
 		lastCheckpoint = transform.position;	//first checkpoint is start
 
 		m_Grounded = true;
+		groundedLastFrame = true;
 		m_Rigidbody.useGravity = false;
 		m_PersonalGravity = Vector3.down * m_GravityStrength;
 
@@ -94,11 +96,14 @@ public class RunnerCharacter : MonoBehaviour
 		m_Rigidbody.AddForce (m_PersonalGravity * Time.fixedDeltaTime);
     }
 
-	public void Move(bool jump, bool left, bool right, bool debug) {
+	public void Move(bool jump, bool left, bool right) {
+		
 		if (!fallen) {
 			GroundCheck ();
-			m_Anim.SetBool ("Ground", m_Grounded);
+			m_Anim.SetBool ("Ground", m_Grounded || groundedLastFrame);
 			m_Anim.SetBool ("JumpFire", false);
+
+			groundedLastFrame = m_Grounded;
 
 			// Move the character
 			Vector3 tempVel = m_Rigidbody.velocity;
@@ -145,12 +150,8 @@ public class RunnerCharacter : MonoBehaviour
 			}
 
 			m_Rigidbody.velocity = tempVel;
-
-			if (debug) {
-				Crash ();
-			}
 		}
-		else if (jump || debug) {
+		else if (jump) {
 			Restart ();
 		}
 	}
