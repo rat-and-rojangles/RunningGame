@@ -63,8 +63,9 @@ public class TouchControl : MonoBehaviour {
 	}
 
 	private void Write(string message){
-		Text o;
-		debugText.text += "\n" + message;
+		if (Debug.isDebugBuild) {
+			debugText.text += "\n" + message;
+		}
 	}
 	private string RDigit(){
 		return ((int)Random.Range (0, 10)).ToString ();
