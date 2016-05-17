@@ -6,6 +6,8 @@ public class CharacterHealth : MonoBehaviour {
 	private int maxHealth = 4;
 	private int health;
 
+	private const float untouchableTime = 0.2f;
+
 	public int Health{
 		get { return health; }
 	}

@@ -331,7 +331,10 @@ public class RunnerCharacter : MonoBehaviour
 		} 
 		else if (other.tag.Equals ("Collectible")) {
 			Destroy (other.gameObject);
-		} 
+		}
+		else if (other.tag.Equals ("Painful")) {
+			print ("ouch");
+		}
 	}
 
 	public void SideTriggerCollide(int direction){

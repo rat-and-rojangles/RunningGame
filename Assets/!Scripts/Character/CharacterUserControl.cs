@@ -37,13 +37,11 @@ public class CharacterUserControl : MonoBehaviour
 	}
 	public void SwipeLeft(){
 		if (m_Character.GetSidestepMode () && !pauseControl.IsPaused ()) {
-			print ("2d mode");
 			m_Switch = true;
 		}
 	}
 	public void SwipeRight(){
 		if (!m_Character.GetSidestepMode () && !pauseControl.IsPaused ()) {
-			print ("sidestep mode");
 			m_Switch = true;
 		}
 	}
