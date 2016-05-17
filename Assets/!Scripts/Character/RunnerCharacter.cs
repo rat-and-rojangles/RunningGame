@@ -5,7 +5,6 @@ using System.Collections;
 
 public class RunnerCharacter : MonoBehaviour
 {
-    [SerializeField] private float m_MaxSpeed = 10f;                    // The fastest the player can travel in the x axis.
 	[SerializeField] private float m_JumpStrength = 15f;                // Upward velocity when the player jumps.
     //[SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
 
@@ -23,6 +22,9 @@ public class RunnerCharacter : MonoBehaviour
 	private Vector3 lastCheckpoint;
 	private Transform m_CamOffset;
 	private Transform m_CamZoom;
+	private const float k_CamZoomPosition = -16f;
+
+	private Transform perfectPosition;
 
 	[SerializeField] private float m_GravityStrength = 1500.0f;
 	private Vector3 m_PersonalGravity;
@@ -54,7 +56,9 @@ public class RunnerCharacter : MonoBehaviour
 		m_CamOffset = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("CamOffset").transform;
 		m_CamZoom = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("CamOffset/CamZoom").transform;
 
-		m_Anim.SetFloat ("AutoMoveSpeed", Mathf.Sqrt(aml.speed)/5);
+		perfectPosition = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("CharacterPosition").transform;
+
+		//m_Anim.SetFloat ("AutoMoveSpeed", Mathf.Sqrt(aml.Speed)/5);
 
 		lastCheckpoint = transform.position;	//first checkpoint is start
 
@@ -94,6 +98,11 @@ public class RunnerCharacter : MonoBehaviour
 
 		//gravity
 		m_Rigidbody.AddForce (m_PersonalGravity * Time.fixedDeltaTime);
+
+		//perfect position
+		if(transform.position.x != perfectPosition.position.x){
+			m_Rigidbody.AddForce (Vector3.right * 100 * (perfectPosition.position.x - transform.position.x));
+		}
     }
 
 	public void Move(bool jump, bool left, bool right) {
@@ -107,7 +116,7 @@ public class RunnerCharacter : MonoBehaviour
 
 			// Move the character
 			Vector3 tempVel = m_Rigidbody.velocity;
-			tempVel.x = aml.speed;
+			tempVel.x = aml.Speed;
 
 			// processes input based on movement mode
 			if (m_SidestepMode) {
@@ -241,13 +250,13 @@ public class RunnerCharacter : MonoBehaviour
 		Vector3 tempRot = m_CamOffset.rotation.eulerAngles;
 		Vector3 tempPos = m_CamZoom.localPosition;
 		float rate = 10.0f;
-		while (m_CamOffset.rotation.eulerAngles.y < 90f && m_CamZoom.localPosition.z < -10f){
+		while (m_CamOffset.rotation.eulerAngles.y < 90f && m_CamZoom.localPosition.z < k_CamZoomPosition){
 			tempRot.y = Mathf.Lerp (m_CamOffset.rotation.eulerAngles.y, 90f, Time.deltaTime * rate);
 			tempQ.eulerAngles = tempRot;
 			m_CamOffset.rotation = tempQ;
 
 			tempPos = m_CamZoom.localPosition;
-			tempPos.z = Mathf.Lerp (m_CamZoom.localPosition.z, -10f, Time.deltaTime * rate);
+			tempPos.z = Mathf.Lerp (m_CamZoom.localPosition.z, k_CamZoomPosition, Time.deltaTime * rate);
 			m_CamZoom.localPosition = tempPos;
 
 			rate += Time.deltaTime;

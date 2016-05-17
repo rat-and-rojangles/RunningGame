@@ -24,26 +24,25 @@ public class CharacterUserControl : MonoBehaviour
     }
 
 	public void Tapped(float screenPosX){
-		m_Jump = true;
-		if (m_Character.GetSidestepMode ()) {
-			if (mainCam.WorldToViewportPoint (transform.position).x > screenPosX) {
-				//m_Character.RailJumpLeft ();
-				m_Left = true;
-			}
-			else if (mainCam.WorldToViewportPoint (transform.position).x < screenPosX) {
-				//m_Character.RailJumpRight ();
-				m_Right = true;
+		if (!pauseControl.IsPaused ()) {
+			m_Jump = true;
+			if (m_Character.GetSidestepMode ()) {
+				if (mainCam.WorldToViewportPoint (transform.position).x > screenPosX) {
+					m_Left = true;
+				} else if (mainCam.WorldToViewportPoint (transform.position).x < screenPosX) {
+					m_Right = true;
+				}
 			}
 		}
 	}
 	public void SwipeLeft(){
-		if (m_Character.GetSidestepMode ()) {
+		if (m_Character.GetSidestepMode () && !pauseControl.IsPaused ()) {
 			print ("2d mode");
 			m_Switch = true;
 		}
 	}
 	public void SwipeRight(){
-		if (!m_Character.GetSidestepMode ()) {
+		if (!m_Character.GetSidestepMode () && !pauseControl.IsPaused ()) {
 			print ("sidestep mode");
 			m_Switch = true;
 		}

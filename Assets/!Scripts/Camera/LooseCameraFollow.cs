@@ -14,6 +14,7 @@ public class LooseCameraFollow : MonoBehaviour {
 
 	void Awake(){
 		m_Target = GameObject.FindGameObjectWithTag ("Player").transform;
+		transform.position = m_Target.position;
 	}
 		
 	void LateUpdate () {
@@ -25,8 +26,8 @@ public class LooseCameraFollow : MonoBehaviour {
 		//Vector3 lerped = Vector3.Lerp (transform.position, m_Target.position, factor);
 		Vector3 lerped = Vector3.Lerp (transform.position, m_Target.position, distance / m_Radius * m_Speed * Time.unscaledDeltaTime);
 
-		//Vector3 newPos = new Vector3 (lerped.x, lerped.y, transform.position.z);
-		Vector3 newPos = new Vector3 (m_Target.position.x, lerped.y, transform.position.z);
+		//Vector3 newPos = new Vector3 (m_Target.position.x, lerped.y, transform.position.z);
+		Vector3 newPos = new Vector3 (transform.position.x, lerped.y, transform.position.z);
 
 		transform.position = newPos;
 	}

@@ -50,7 +50,7 @@ public class FadeBehind : MonoBehaviour {
 			return k_PauseFadeRate;
 		}
 		else {
-			return autoMover.speed / 4;
+			return autoMover.Speed / 4;
 		}
 	}
 
