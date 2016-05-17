@@ -1,12 +1,14 @@
 ﻿Shader "Projector/image" {
    Properties {
+      _Color ("Blend Color", Color) = (1,1,1,1)
       _ShadowTex ("Projected Image", 2D) = "white" {}
    }
    SubShader {
-      Pass {      
+      Pass {
+      	 //Blend OneMinusDstColor One      
          //Blend One One 
-         Blend SrcAlpha OneMinusSrcAlpha
-            // add color of _ShadowTex to the color in the framebuffer 
+         Blend SrcAlpha OneMinusSrcAlpha // add color of _ShadowTex to the color in the framebuffer 
+
          ZWrite Off // don't change depths
          Offset -1, -1 // avoid depth fighting
 
@@ -17,6 +19,7 @@
  
          // User-specified properties
          uniform sampler2D _ShadowTex; 
+         float4 _Color;
  
          // Projector-specific uniforms
          uniform float4x4 _Projector; // transformation matrix 
@@ -46,10 +49,13 @@
          {
             if (input.posProj.w > 0.0) // in front of projector?
             {
-               return tex2D(_ShadowTex , 
-                  input.posProj.xy / input.posProj.w); 
-               // alternatively: return tex2Dproj(  
-               //    _ShadowTex, input.posProj);
+               //return tex2D(_ShadowTex , input.posProj.xy / input.posProj.w); 
+               float4 f = tex2D(_ShadowTex , input.posProj.xy / input.posProj.w);
+               f.rgb *= _Color.rgb;
+               return f;
+
+               // alternatively:
+               // return tex2Dproj(_ShadowTex, input.posProj);
             }
             else // behind projector
             {
