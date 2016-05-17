@@ -1,5 +1,6 @@
 ﻿Shader "Projector/image" {
    Properties {
+      _Color ("Blend Color", Color) = (1,1,1,1)
       _ShadowTex ("Projected Image", 2D) = "white" {}
    }
    SubShader {
@@ -17,18 +18,19 @@
  
          // User-specified properties
          uniform sampler2D _ShadowTex; 
- 
+         uniform fixed4 _Color;
+
          // Projector-specific uniforms
-         uniform float4x4 _Projector; // transformation matrix 
+         uniform fixed4x4 _Projector; // transformation matrix 
             // from object space to projector space 
  
           struct vertexInput {
-            float4 vertex : POSITION;
+            fixed4 vertex : POSITION;
             float3 normal : NORMAL;
          };
          struct vertexOutput {
-            float4 pos : SV_POSITION;
-            float4 posProj : TEXCOORD0;
+            fixed4 pos : SV_POSITION;
+            fixed4 posProj : TEXCOORD0;
                // position in projector space
          };
  
@@ -42,18 +44,17 @@
          }
  
  
-         float4 frag(vertexOutput input) : COLOR
+         fixed4 frag(vertexOutput input) : COLOR
          {
             if (input.posProj.w > 0.0) // in front of projector?
             {
-               return tex2D(_ShadowTex , 
-                  input.posProj.xy / input.posProj.w); 
-               // alternatively: return tex2Dproj(  
-               //    _ShadowTex, input.posProj);
+               fixed4 f = tex2D(_ShadowTex , input.posProj.xy / input.posProj.w); 
+               f.rgb *= _Color.rgb;
+               return f;
             }
             else // behind projector
             {
-               return float4(0.0, 0.0, 0.0, 0.0);
+               return fixed4(0.0, 0.0, 0.0, 0.0);
             }
          }
  
