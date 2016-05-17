@@ -556,11 +556,11 @@ namespace TouchScript
             {
                 if (Camera.main != null)
                 {
-                    if (Application.isEditor)
+                    /*if (Application.isEditor)
                         Debug.Log(
                             "[TouchScript] No camera layer found, adding CameraLayer for the main camera. (this message is harmless)");
                     var layer = Camera.main.gameObject.AddComponent<CameraLayer>();
-                    AddLayer(layer);
+                    AddLayer(layer);*/
                 }
             }
         }

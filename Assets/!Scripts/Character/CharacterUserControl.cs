@@ -49,44 +49,6 @@ public class CharacterUserControl : MonoBehaviour
 		}
 	}
 
-    private void Update()
-    {
-		if (CrossPlatformInputManager.GetButtonDown ("Pause")) {	// Pause
-			pauseControl.TogglePause();
-		}
-
-		/*
-		// Read the button inputs in Update so button presses aren't missed.
-		if (!pauseControl.IsPaused()) {	// Does not queue input while paused
-			if (!m_Jump) {	
-				m_Jump = CrossPlatformInputManager.GetButtonDown ("Jump");
-				//m_Jump = touchInput.GetTap();
-			}
-			if (!m_Left) {	
-				m_Left = CrossPlatformInputManager.GetButtonDown ("Left");
-			}
-			if (!m_Right) {	
-				m_Right = CrossPlatformInputManager.GetButtonDown ("Right");
-			}
-			if (!m_Down) {	
-				m_Down = CrossPlatformInputManager.GetButtonDown ("Down");
-			}
-			if (!m_Switch) {	
-				//m_Switch = CrossPlatformInputManager.GetButtonDown ("Switch");
-				m_Switch = Input.GetButtonDown ("Switch");
-			}
-		}
-
-		if (pauseControl.IsPaused()) {	// allows for restarting the level while paused
-			if (Input.GetKeyUp (KeyCode.Backspace)) {
-				m_Character.Restart ();
-				pauseControl.Unpause ();
-			}
-		}
-		*/
-    }
-
-
     private void FixedUpdate()
 	{
         // Pass all parameters to the character control script, but not if it's paused
