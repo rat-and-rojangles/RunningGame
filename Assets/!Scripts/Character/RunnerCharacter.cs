@@ -43,6 +43,8 @@ public class RunnerCharacter : MonoBehaviour
 	private IEnumerator railForce;
 	private IEnumerator stopStep;
 
+	private CharacterHealth health;
+
 	private const float k_SidestepAnimationLength = 0.1f;
 
     private void Awake()
@@ -58,7 +60,7 @@ public class RunnerCharacter : MonoBehaviour
 
 		perfectPosition = GameObject.FindGameObjectWithTag ("CameraController").transform.Find ("CharacterPosition").transform;
 
-		//m_Anim.SetFloat ("AutoMoveSpeed", Mathf.Sqrt(aml.Speed)/5);
+		health = GetComponent<CharacterHealth> ();
 
 		lastCheckpoint = transform.position;	//first checkpoint is start
 
@@ -307,8 +309,7 @@ public class RunnerCharacter : MonoBehaviour
 
 
 	public void Restart(){
-		m_Rigidbody.drag = 0;
-		fallen = false;
+		health.Refill ();
 		ResetAnimation ();
 		m_Rigidbody.velocity = Vector3.zero;
 		transform.position = lastCheckpoint;
@@ -332,8 +333,11 @@ public class RunnerCharacter : MonoBehaviour
 		else if (other.tag.Equals ("Collectible")) {
 			Destroy (other.gameObject);
 		}
-		else if (other.tag.Equals ("Painful")) {
-			print ("ouch");
+	}
+	void OnTriggerStay(Collider other){
+		if (other.tag.Equals ("Painful")) {
+			print ("boi");
+			health.Damage ();
 		}
 	}
 
@@ -358,18 +362,5 @@ public class RunnerCharacter : MonoBehaviour
 				m_RailForceSign = m_RailForceSign * -1;
 			}
 		}
-	}
-
-	public void Crash(){
-		fallen = true;
-		m_Rigidbody.velocity = Vector3.zero;
-		m_Anim.SetBool ("Ground", false);
-		m_Anim.SetBool ("JumpFire", false);
-		m_Anim.SetBool ("LeftStep", false);
-		m_Anim.SetBool ("RightStep", false);
-		m_Anim.SetBool ("BackFall", true);
-		m_Rigidbody.drag = 5;
-		m_Rigidbody.AddForce (Vector3.left*1000);
-
 	}
 }

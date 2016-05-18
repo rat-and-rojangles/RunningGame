@@ -1,4 +1,4 @@
-﻿Shader "Projector/Texture" {
+﻿Shader "Projector/image" {
    Properties {
       _Color ("Blend Color", Color) = (1,1,1,1)
       _ShadowTex ("Projected Image", 2D) = "white" {}
